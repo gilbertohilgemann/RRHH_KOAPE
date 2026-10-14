@@ -13,9 +13,9 @@ class SucursalEnLinea(admin.TabularInline):
 
 @admin.register(Empresa)
 class EmpresaAdmin(RegistroAdmin):
-    list_display = ('nombre', 'ruc', 'numero_patronal_ips', 'activa')
+    list_display = ('nombre', 'direccion_acceso', 'ruc', 'numero_patronal_ips', 'activa')
     list_filter = ('activa',)
-    search_fields = ('nombre', 'razon_social', 'ruc')
+    search_fields = ('nombre', 'razon_social', 'ruc', 'direccion_acceso')
     inlines = [SucursalEnLinea]
 
     def save_formset(self, request, form, formset, change):

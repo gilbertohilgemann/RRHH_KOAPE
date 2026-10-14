@@ -36,8 +36,11 @@ export default function Manual() {
       <Seccion numero={++n} titulo="Entrar y salir" abierta>
         <p>Entrá con el usuario y la contraseña que te dio el administrador de tu empresa. Para cerrar la sesión usá
           <strong> Salir</strong>, arriba a la derecha: se cierra en todos los dispositivos donde la tenías abierta.</p>
-        <p>El menú de la izquierda agrupa las pantallas en <strong>Personal</strong>, <strong>Jornada</strong>,
-          <strong> Estructura</strong> y <strong>Administración</strong>: tocá el nombre del grupo para desplegar o cerrar
+        <p>Tu empresa puede tener su <strong>dirección de ingreso propia</strong>, con su logo y sus colores (por ejemplo
+          <code> hhrr.koapesystem.com/delacosta</code>): guardala en favoritos. Por esa dirección solo entran los usuarios de tu empresa;
+          al salir, volvés a ella.{usuario?.empresa?.direccion_acceso ? ` La de tu empresa es /${usuario.empresa.direccion_acceso}.` : ''}</p>
+        <p>El menú de la izquierda agrupa las pantallas por tema (Personal, Jornada, Asistencia, Licencias, Nómina, Reportes,
+          Estructura, Administración): tocá el nombre del grupo para desplegar o cerrar
           sus opciones. El grupo de la pantalla que estás viendo se abre solo, y el sistema recuerda cuáles dejaste abiertos.</p>
         <p>En el celular, el menú se abre con el botón ☰ de arriba a la izquierda.</p>
         <Aviso>Después de 10 intentos fallidos en un minuto, el sistema te pide esperar. Cada intento queda registrado.</Aviso>

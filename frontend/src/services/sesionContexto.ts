@@ -4,7 +4,8 @@ import type { DatosUsuario } from '../tipos'
 export interface ValorSesion {
   usuario: DatosUsuario | null
   cargando: boolean
-  ingresar: (usuario: string, clave: string) => Promise<void>
+  /** `empresa`: la dirección de acceso si se entró por /<dirección> (solo entran usuarios de esa empresa). */
+  ingresar: (usuario: string, clave: string, empresa?: string) => Promise<void>
   salir: () => Promise<void>
   /** Vuelve a pedir los datos de la sesión (permisos, perfiles…). */
   actualizar: () => Promise<void>

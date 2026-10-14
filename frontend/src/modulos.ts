@@ -1336,6 +1336,8 @@ export const MODULOS: Modulo[] = [
     endpoint: 'empresas', modelo: 'plataforma.empresa', sinAlta: true,
     campos: [
       texto('nombre', 'Nombre comercial', { requerido: true, maxLength: 150, seccion: 'Empresa' }),
+      texto('direccion_acceso', 'Dirección de acceso', { soloLectura: true,
+        ayuda: 'Ingreso propio con su logo y colores: hhrr.koapesystem.com/<dirección>. La asigna Koape.' }),
       texto('razon_social', 'Razón social', { maxLength: 200 }),
       texto('ruc', 'RUC', { maxLength: 30 }),
       texto('actividad', 'Actividad económica', { maxLength: 150 }),

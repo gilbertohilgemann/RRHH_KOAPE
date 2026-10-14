@@ -64,6 +64,51 @@ class IngresoTests(EscenarioMixin, TestCase):
         self.assertEqual(r.status_code, 403)
 
 
+class DireccionAccesoTests(EscenarioMixin, TestCase):
+    """Ingreso propio de cada empresa: hhrr.koapesystem.com/<dirección>."""
+
+    def setUp(self):
+        from django.core.cache import cache
+        cache.clear()  # el límite de intentos de ingreso no se arrastra entre pruebas
+        self.addCleanup(cache.clear)
+        Empresa.objects.filter(pk=self.e1.pk).update(direccion_acceso='uno', color_primario='#1E3A8A')
+
+    def ingresar(self, usuario, empresa=None):
+        datos = {'usuario': usuario, 'clave': 'clave-de-prueba-123'}
+        if empresa:
+            datos['empresa'] = empresa
+        return APIClient().post('/api/sesion/ingresar/', datos)
+
+    def test_la_pantalla_publica_solo_muestra_la_marca(self):
+        r = APIClient().get('/api/acceso/uno/')
+        self.assertEqual((r.status_code, r.data['nombre'], r.data['marca']['color_primario']), (200, 'Empresa Uno S.A.', '#1E3A8A'))
+        self.assertEqual(set(r.data), {'nombre', 'direccion_acceso', 'marca'})
+        self.assertEqual(APIClient().get('/api/acceso/no-existe/').status_code, 404)
+        Empresa.objects.filter(pk=self.e1.pk).update(activa=False)
+        self.assertEqual(APIClient().get('/api/acceso/uno/').status_code, 404)
+
+    def test_por_la_direccion_de_una_empresa_solo_entran_sus_usuarios(self):
+        self.assertEqual(self.ingresar('admin1', 'uno').status_code, 200)
+        self.assertEqual(self.ingresar('admin1', 'UNO').status_code, 200)
+        rechazo = self.ingresar('admin2', 'uno')
+        self.assertEqual((rechazo.status_code, rechazo.data['detail']), (400, 'Usuario o contraseña incorrectos.'))
+        self.assertTrue(EventoAuditoria.objects.filter(accion=EventoAuditoria.INGRESO_FALLIDO, descripcion__contains='otra empresa').exists())
+        self.assertEqual(self.ingresar('plataforma', 'uno').status_code, 200)  # Koape entra por cualquiera
+        self.assertEqual(self.ingresar('admin2').status_code, 200)  # sin dirección: el ingreso estándar
+        self.assertEqual(self.ingresar('admin1', 'uno').data['usuario']['empresa']['direccion_acceso'], 'uno')
+
+    def test_la_asigna_la_plataforma_y_no_usa_palabras_del_sistema(self):
+        self.cliente(self.admin1).patch(f'/api/empresas/{self.e1.pk}/', {'direccion_acceso': 'otra'})
+        self.e1.refresh_from_db()
+        self.assertEqual(self.e1.direccion_acceso, 'uno')  # el administrador de la empresa no la cambia
+        r = self.cliente(self.plataforma).patch(f'/api/empresas/{self.e2.pk}/', {'direccion_acceso': 'admin'})
+        self.assertEqual(r.status_code, 400)
+        r = self.cliente(self.plataforma).patch(f'/api/empresas/{self.e2.pk}/', {'direccion_acceso': 'Mal Escrita'})
+        self.assertEqual(r.status_code, 400)
+        r = self.cliente(self.plataforma).patch(f'/api/empresas/{self.e2.pk}/', {'direccion_acceso': 'delacosta'})
+        self.assertEqual((r.status_code, r.data['direccion_acceso']), (200, 'delacosta'))
+
+
 class AislamientoTests(EscenarioMixin, TestCase):
     def test_administrador_ve_solo_su_empresa(self):
         r = self.cliente(self.admin1).get('/api/empleados/')

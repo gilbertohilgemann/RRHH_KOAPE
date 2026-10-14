@@ -12,7 +12,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.response import Response
 
-from core import auditoria
+from core import alcance, auditoria
 from core.api.base import RegistroSerializer, RegistroViewSet
 from core.models import EventoAuditoria
 from plataforma.models import Empresa, Sucursal
@@ -29,6 +29,14 @@ class EmpresaSerializer(RegistroSerializer):
         model = Empresa
         exclude = ['logo']
         read_only_fields = ['activa']
+
+    def get_fields(self):
+        campos = super().get_fields()
+        # La dirección de acceso la asigna la plataforma (cambiarla rompe el enlace que usan los empleados).
+        usuario = getattr(self.context.get('request'), 'user', None)
+        if 'direccion_acceso' in campos and not alcance.es_plataforma(usuario):
+            campos['direccion_acceso'].read_only = True
+        return campos
 
     def get_marca(self, empresa):
         return empresa.marca(self.context.get('request'))

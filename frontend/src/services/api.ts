@@ -31,6 +31,29 @@ export function guardarToken(token: string | null) {
   }
 }
 
+// Dirección de acceso de la empresa por la que se entró (hhrr.koapesystem.com/<dirección>):
+// al salir o al vencer la sesión se vuelve a ese mismo ingreso personalizado.
+const CLAVE_ACCESO = 'koape_rrhh_acceso'
+
+export function guardarAcceso(direccion: string | null) {
+  try {
+    if (direccion) localStorage.setItem(CLAVE_ACCESO, direccion)
+    else localStorage.removeItem(CLAVE_ACCESO)
+  } catch {
+    // Sin almacenamiento: se vuelve al ingreso estándar.
+  }
+}
+
+/** La pantalla de ingreso a la que hay que volver: la de la empresa, o la estándar. */
+export function rutaIngreso(): string {
+  try {
+    const direccion = localStorage.getItem(CLAVE_ACCESO)
+    return direccion ? `/${direccion}` : '/ingresar'
+  } catch {
+    return '/ingresar'
+  }
+}
+
 // Sin 'Content-Type' fijo: axios pone application/json para los objetos y
 // multipart/form-data (con su separador) para los FormData. Si se fijara
 // application/json, axios convertiría los FormData a JSON y los archivos
@@ -53,7 +76,8 @@ api.interceptors.response.use(
     const url: string = error.config?.url ?? ''
     if (error.response?.status === 401 && !url.includes('sesion/ingresar')) {
       guardarToken(null)
-      if (window.location.pathname !== '/ingresar') window.location.assign('/ingresar')
+      const ingreso = rutaIngreso()
+      if (window.location.pathname !== ingreso) window.location.assign(ingreso)
     }
     return Promise.reject(error)
   },

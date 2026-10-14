@@ -10,6 +10,14 @@ COLOR_PRIMARIO_KOAPE = '#E9264B'
 COLOR_SECUNDARIO_KOAPE = '#F7941D'
 
 validar_color = RegexValidator(r'^#[0-9A-Fa-f]{6}$', 'Usá un color en formato #RRGGBB (ej. #E9264B).')
+validar_direccion = RegexValidator(r'^[a-z0-9]+(-[a-z0-9]+)*$',
+                                   'Solo minúsculas sin acentos, números y guiones (ej. delacosta o de-la-costa).')
+# Primeros tramos de las direcciones de la aplicación y del servidor: una empresa no puede usarlos.
+DIRECCIONES_RESERVADAS = {
+    'admin', 'api', 'static', 'media', 'assets', 'ingresar', 'terminal', 'marcar', 'm', 'manual', 'asistencia', 'nomina',
+    'recibos', 'reportes', 'vacaciones', 'mi-ficha', 'mi-marcacion', 'mi-asistencia', 'mis-licencias', 'mis-movimientos',
+    'mis-recibos', 'koape-rrhh', 'plataforma', 'salir', 'login', 'www',
+}
 
 
 def _luminancia(color):
@@ -32,6 +40,10 @@ class Empresa(RegistroBase):
     borra: se desactiva (los legajos, nóminas y la auditoría se conservan)."""
 
     nombre = models.CharField('nombre comercial', max_length=150, unique=True)
+    direccion_acceso = models.CharField(
+        'dirección de acceso', max_length=40, unique=True, null=True, blank=True, validators=[validar_direccion],
+        help_text='La parte final de la dirección de ingreso propia de la empresa: hhrr.koapesystem.com/<dirección>. '
+                  'Ahí el ingreso muestra su logo y sus colores, y solo entran sus usuarios. Vacía = sin dirección propia.')
     razon_social = models.CharField('razón social', max_length=200, blank=True)
     ruc = models.CharField('RUC', max_length=30, blank=True)
     # Datos para las obligaciones ante IPS y MTESS (fase 11).
@@ -73,7 +85,16 @@ class Empresa(RegistroBase):
     def __str__(self):
         return self.nombre
 
+    def save(self, *args, **kwargs):
+        # Vacía = NULL (varias empresas pueden no tener dirección propia sin chocar con la unicidad).
+        self.direccion_acceso = (self.direccion_acceso or '').strip().lower() or None
+        super().save(*args, **kwargs)
+
     def clean(self):
+        if self.direccion_acceso:
+            self.direccion_acceso = self.direccion_acceso.strip().lower()
+            if self.direccion_acceso in DIRECCIONES_RESERVADAS:
+                raise ValidationError({'direccion_acceso': 'Esa dirección la usa el sistema: elegí otra.'})
         # Los botones llevan texto blanco sobre el color principal: se exige
         # el contraste mínimo de WCAG para texto grande/negrita (3:1).
         if self.color_primario and validar_color.regex.match(self.color_primario) \

@@ -250,6 +250,8 @@ REST_FRAMEWORK = {
     # no se pueda usar para probar contraseñas por fuerza bruta.
     'DEFAULT_THROTTLE_RATES': {
         'ingreso': '10/minute',
+        # Pantalla de ingreso de cada empresa (/<dirección>): solo nombre, logo y colores.
+        'acceso': '60/minute',
         # Marcador: QR que envía el empleado y consultas de cada terminal (su pantalla pregunta cada segundo).
         'qr': '12/minute',
         'terminal': '300/minute',

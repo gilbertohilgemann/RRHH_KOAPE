@@ -9,6 +9,7 @@ patronal y preparación de información para MTESS/IPS.
 - **Diagnóstico, decisiones y plan por fases**: [`docs/plan-fases.md`](docs/plan-fases.md).
 - **Bitácora de cambios**: [`docs/bitacora.md`](docs/bitacora.md). Cada cambio suma su entrada en el mismo trabajo.
 - **Para Claude**: [`CLAUDE.md`](CLAUDE.md).
+- **Repositorio**: `github.com/gilbertohilgemann/RRHH_KOAPE` (privado).
 - **Convenciones obligatorias**: [`Convenciones-de-Proyecto.txt`](Convenciones-de-Proyecto.txt).
 - **Proyecto de referencia**: `KOAPE-PORCINO` (misma estructura e infraestructura).
 
@@ -289,6 +290,11 @@ Casi todos heredan de `core.models.RegistroBase` (auditoría: `creado_por`,
   CORRESPONDE_PREAVISO, CORRESPONDE_INDEMNIZACION y SALDO_VACACIONES, calculadas con los parámetros de PY-EGRESO.
 - **Reportes y exportaciones**: un reporte nuevo se agrega con el decorador `@reporte(...)` en `core/reportes.py`
   (permiso, filtros, columnas; filtrar siempre con `alcance.filtrar`). Toda exportación pasa por `core/exportar.py`.
+- **Dirección de ingreso por empresa**: `Empresa.direccion_acceso` → `hhrr.koapesystem.com/<dirección>` (ruta
+  `/:direccion` del frontend, la última antes del comodín: las rutas fijas tienen prioridad). `GET /api/acceso/<dirección>/`
+  da nombre y marca sin sesión; `POST /api/sesion/ingresar/` con `empresa` solo acepta usuarios de esa empresa (o la
+  plataforma). Las palabras reservadas están en `plataforma.models.DIRECCIONES_RESERVADAS`: si se agrega una ruta de
+  primer nivel al frontend, sumarla ahí.
 - **Identidad y personalización**: la identidad de Koape (logo y colores del
   logo) es la de la plataforma y la de toda empresa sin la suya. Cada empresa
   puede cargar logo y colores principal/secundario (`Empresa.marca()`); la

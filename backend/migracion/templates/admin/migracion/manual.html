@@ -31,6 +31,9 @@
       <ol>
         <li>Entrá a <a href="{% url 'admin:plataforma_empresa_add' %}">Empresas → Agregar</a> y cargá el nombre,
           RUC y los números patronales de IPS y MTESS. En la misma pantalla podés cargar sus sucursales.</li>
+        <li>En <em>Dirección de acceso</em> poné la parte final de su ingreso propio (ej. <code>delacosta</code> →
+          <code>hhrr.koapesystem.com/delacosta</code>): minúsculas sin acentos, números y guiones. Ahí el ingreso muestra su
+          logo y sus colores y solo entran sus usuarios. Evitá cambiarla después: los empleados la guardan en favoritos.</li>
         <li>Creá el primer usuario de la empresa en
           <a href="{% url 'admin:auth_user_add' %}">Usuarios → Agregar</a>: usuario y contraseña, después
           completá nombre, en <em>Grupos</em> elegí <strong>Administrador</strong> y abajo, en

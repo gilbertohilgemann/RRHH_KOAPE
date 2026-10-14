@@ -175,7 +175,8 @@ export interface DatosUsuario {
   nivel: Nivel
   /** Nombres de los grupos de Django: 'Administrador', 'Gestor RR. HH.', 'Empleado', 'Koape'. */
   perfiles: string[]
-  empresa: { id: number; nombre: string } | null
+  /** `direccion_acceso`: su ingreso propio (hhrr.koapesystem.com/<dirección>), si tiene. */
+  empresa: { id: number; nombre: string; direccion_acceso?: string | null } | null
   /** Logo y colores de su empresa (los de Koape si no cargó los suyos o es la plataforma). */
   marca: Marca
   /** Sucursales a las que está limitado (vacío = todas). */

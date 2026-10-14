@@ -2,6 +2,24 @@
 
 Qué se cambió, cuándo y por qué. Lo más reciente arriba.
 
+## 14/10/2026 — Repositorio en GitHub y dirección de ingreso propia por empresa
+
+- **GitHub**: repositorio privado `gilbertohilgemann/RRHH_KOAPE` (rama `main`). Igual que PORCINO: se lee por HTTPS y
+  se sube por SSH con una clave propia del repositorio (`~/.ssh/id_ed25519_koape_rrhh_push`, alias `github-koape-rrhh`,
+  publicada como deploy key con escritura). Los `.gitignore` excluyen `.env`, la base, `privado/`, `backups/`, `venv`
+  y `node_modules`. La contraseña inicial fija del superusuario (convención de PORCINO) está en el código: el
+  repositorio tiene que seguir siendo privado y en el servidor se cambia al entrar.
+- **Dirección de ingreso por empresa** (pedido del cliente): `Empresa.direccion_acceso` (única, minúsculas, números y
+  guiones; no puede ser una palabra que usa el sistema: admin, api, ingresar, terminal…). `hhrr.koapesystem.com/<dirección>`
+  muestra el logo, el nombre y los colores de esa empresa (`GET /api/acceso/<dirección>/`, público, solo nombre y
+  marca, con límite de pedidos) y por ahí solo entran sus usuarios (y la plataforma); si no corresponde, el mismo
+  mensaje que una contraseña errónea, y queda en la auditoría. Sin dirección (o con una inexistente), el ingreso
+  estándar de Koape. Al salir o al vencer la sesión se vuelve a la dirección por la que se entró. La asigna la
+  plataforma (el administrador de la empresa la ve pero no la cambia). La demo usa `/demo`.
+- `frontend/.env.production` (`VITE_API_URL=/api`) para el servidor, donde nginx sirve la aplicación y la API en el
+  mismo dominio.
+- **Pruebas**: 282, todas OK (3 nuevas).
+
 ## 14/10/2026 — Fase 11: aguinaldo, liquidación final, planillas MTESS/IPS y reportes
 
 - **Aguinaldo**: liquidación de tipo "aguinaldo" en un período especial del año (`liquidar.crear_aguinaldo`). Toma,

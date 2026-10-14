@@ -28,7 +28,7 @@ def datos_usuario(usuario, request=None):
         'nombre': usuario.get_full_name() or usuario.username,
         'nivel': alcance.nivel_de(usuario),
         'perfiles': sorted(alcance.roles_de(usuario)),
-        'empresa': {'id': empresa.pk, 'nombre': empresa.nombre} if empresa else None,
+        'empresa': {'id': empresa.pk, 'nombre': empresa.nombre, 'direccion_acceso': empresa.direccion_acceso} if empresa else None,
         # Logo y colores de la empresa (los de Koape para la plataforma o si no cargó los suyos).
         'marca': empresa.marca(request) if empresa else _marca_koape(),
         'sucursales': [{'id': s.pk, 'nombre': s.nombre} for s in perfil.sucursales.all()] if perfil else [],
@@ -52,6 +52,16 @@ class IngresarView(APIView):
     def post(self, request):
         nombre = str(request.data.get('usuario', ''))[:150]
         usuario = authenticate(request, username=nombre, password=request.data.get('clave', ''))
+        # Desde la dirección propia de una empresa (/<dirección>) solo entran sus usuarios (y la plataforma).
+        # Si no corresponde, el mismo mensaje que una contraseña errónea: no se revela en qué empresa está cada usuario.
+        direccion = str(request.data.get('empresa') or '').strip().lower()
+        if usuario is not None and direccion and not alcance.es_plataforma(usuario):
+            empresa = alcance.empresa_de(usuario)
+            if empresa is None or empresa.direccion_acceso != direccion:
+                auditoria.registrar(None, EventoAuditoria.INGRESO_FALLIDO, usuario, request=request, empresa=empresa,
+                                    descripcion=f'Ingreso rechazado: "{nombre}" intentó entrar por la dirección de otra empresa ({direccion}).',
+                                    modelo='auth.User')
+                return Response({'detail': 'Usuario o contraseña incorrectos.'}, status=status.HTTP_400_BAD_REQUEST)
         if usuario is None or not usuario.is_active:
             conocido = User.objects.filter(username=nombre).first()
             auditoria.registrar(None, EventoAuditoria.INGRESO_FALLIDO, conocido, request=request,
@@ -68,6 +78,23 @@ class IngresarView(APIView):
         auditoria.registrar(usuario, EventoAuditoria.INGRESO, usuario, empresa=alcance.empresa_de(usuario),
                             request=request, descripcion='Ingreso a la aplicación.')
         return Response({'token': token.key, 'usuario': datos_usuario(usuario, request)})
+
+
+class AccesoEmpresaView(APIView):
+    """`GET /api/acceso/<dirección>/`: lo mínimo para personalizar la pantalla de ingreso de una empresa (nombre,
+    logo y colores). Público, con límite de pedidos; una dirección inexistente o de una empresa inactiva da 404."""
+
+    permission_classes = [AllowAny]
+    authentication_classes = []
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'acceso'
+
+    def get(self, request, direccion):
+        from plataforma.models import Empresa
+        empresa = Empresa.objects.filter(direccion_acceso=direccion.lower(), activa=True).first()
+        if empresa is None:
+            return Response({'detail': 'No existe esa dirección.'}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'nombre': empresa.nombre, 'direccion_acceso': empresa.direccion_acceso, 'marca': empresa.marca(request)})
 
 
 class SalirView(APIView):

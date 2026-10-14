@@ -39,8 +39,10 @@ React + Vite + TS + Tailwind v4 en `frontend/`). Todo en castellano.
   Windows (`Cert:\LocalMachine\Root`, `Cert:\CurrentUser\Root`, `Cert:\LocalMachine\CA`)
   a un `.pem` y usar `pip install --cert <archivo>`; para npm, `NODE_EXTRA_CA_CERTS=<archivo>`.
 - `git` no está en el PATH (el de GitHub Desktop está en
-  `%LOCALAPPDATA%\GitHubDesktop\app-*\resources\app\git\cmd\git.exe`). El
-  proyecto todavía **no** es un repositorio git.
+  `%LOCALAPPDATA%\GitHubDesktop\app-*\resources\app\git\cmd\git.exe`). Repositorio:
+  `github.com/gilbertohilgemann/RRHH_KOAPE` (con guion bajo; privado). Se sube por SSH con el alias
+  `github-koape-rrhh` (clave `~/.ssh/id_ed25519_koape_rrhh_push`, deploy key con escritura); el repo
+  ya tiene `core.sshCommand` apuntando al OpenSSH de Windows. Commitear y subir solo cuando el cliente lo pide.
 - Puertos: backend **8004**, frontend **5204** (los demás sistemas usan 8000–8003, 8100, 5173/5174/5183/5201/5203).
 - Base local con la demo (`cargar_datos_demo`): usuarios `admin_demo`,
   `gestor_demo`, `empleado_demo`. Cada corrida regenera la clave de la terminal

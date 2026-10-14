@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
-import api, { guardarToken, leerToken } from './api'
+import api, { guardarAcceso, guardarToken, leerToken } from './api'
 import { SesionContexto } from './sesionContexto'
 import { aplicarMarca } from '../marca'
 import type { DatosUsuario } from '../tipos'
@@ -20,12 +20,14 @@ export function SesionProvider({ children }: { children: ReactNode }) {
       .finally(() => setCargando(false))
   }, [])
 
-  const ingresar = useCallback(async (nombreUsuario: string, clave: string) => {
+  const ingresar = useCallback(async (nombreUsuario: string, clave: string, empresa?: string) => {
     const r = await api.post<{ token: string; usuario: DatosUsuario }>('/sesion/ingresar/', {
       usuario: nombreUsuario,
       clave,
+      empresa: empresa || undefined,
     })
     guardarToken(r.data.token)
+    guardarAcceso(empresa || null)
     setUsuario(r.data.usuario)
   }, [])
 

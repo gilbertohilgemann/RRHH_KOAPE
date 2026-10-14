@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { LogOut, Menu, X } from 'lucide-react'
 import { Link, Navigate, Outlet, useLocation } from 'react-router-dom'
 import { useSesion } from '../services/sesionContexto'
+import { rutaIngreso } from '../services/api'
 import MenuLateral from './MenuLateral'
 import { LOGO_KOAPE, logoDe } from '../marca'
 
@@ -24,7 +25,8 @@ export default function Diseno() {
     return <div className="fondo-app flex items-center justify-center text-stone-500">Cargando…</div>
   }
   // Al iniciar sesión se vuelve a donde quería ir (ej. el enlace de un QR de marcación).
-  if (!usuario) return <Navigate to="/ingresar" replace state={{ desde: ubicacion.pathname }} />
+  // Vuelve al ingreso de su empresa (/<dirección>) si entró por ahí; si no, al estándar.
+  if (!usuario) return <Navigate to={rutaIngreso()} replace state={{ desde: ubicacion.pathname }} />
 
   return (
     <div className="fondo-app flex flex-col">

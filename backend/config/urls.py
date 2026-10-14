@@ -5,7 +5,7 @@ from django.views.static import serve
 from rest_framework.routers import DefaultRouter
 
 from core.api.auditoria import EventoAuditoriaViewSet
-from core.api.views import IngresarView, ResumenView, SalirView, YoView
+from core.api.views import AccesoEmpresaView, IngresarView, ResumenView, SalirView, YoView
 from core.api import reportes as api_reportes
 from cumplimiento.api import PresentacionViewSet
 from cuentas.api import UsuarioViewSet
@@ -92,6 +92,7 @@ urlpatterns = [
     path('api/sesion/salir/', SalirView.as_view(), name='sesion-salir'),
     path('api/sesion/yo/', YoView.as_view(), name='sesion-yo'),
     path('api/resumen/', ResumenView.as_view(), name='resumen'),
+    path('api/acceso/<slug:direccion>/', AccesoEmpresaView.as_view(), name='acceso-empresa'),
     path('api/reportes/', api_reportes.lista, name='reportes'),
     path('api/reportes/<slug:clave>/', api_reportes.ver, name='reporte'),
     path('api/variables-nomina/', variables_nomina, name='variables-nomina'),

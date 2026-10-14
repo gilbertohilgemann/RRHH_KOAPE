@@ -47,6 +47,7 @@ class Command(BaseCommand):
         empresa, creada = Empresa.objects.get_or_create(nombre=NOMBRE_EMPRESA, defaults={
             'razon_social': 'Empresa Demo Sociedad Anónima', 'ruc': '80099999-0',
             'numero_patronal_ips': '0000-00000', 'actividad': 'Comercio minorista', 'direccion': 'Encarnación, Paraguay',
+            'direccion_acceso': 'demo',  # ingreso propio: /demo
         })
         if creada:
             sucursales = {
