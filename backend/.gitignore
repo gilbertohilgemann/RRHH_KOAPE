@@ -1,0 +1,14 @@
+*.pyc
+__pycache__/
+db.sqlite3
+*.sqlite3
+.env
+media/
+# Documentos del legajo, fotos, logos e importaciones (datos, no código): viajan en el backup, nunca al repositorio.
+privado/
+backups/
+staticfiles/
+venv/
+.venv/
+*.log
+.DS_Store

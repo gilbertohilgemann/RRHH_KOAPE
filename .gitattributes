@@ -1,0 +1,3 @@
+# Los scripts de Linux tienen que viajar siempre con finales de línea LF:
+# con CRLF (Windows) bash falla con "$'\r': command not found" en el VPS.
+*.sh text eol=lf

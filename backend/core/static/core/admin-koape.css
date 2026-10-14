@@ -1,0 +1,17 @@
+/* Admin de la plataforma con la identidad de Koape: el degradado del logo
+   (magenta → rojo → naranja → amarillo) como franja superior y el rojo
+   #E9264B como color de acento. */
+.main-header {
+  border-top: 4px solid transparent;
+  border-image: linear-gradient(90deg, #D9418A, #E9264B, #F7941D, #EEF01A) 1;
+}
+.brand-link .brand-image { max-height: 34px; }
+.nav-sidebar .nav-link.active,
+.sidebar-light-danger .nav-sidebar > .nav-item > .nav-link.active {
+  background-color: #E9264B !important;
+  color: #fff !important;
+}
+.btn-primary, .btn-danger { background-color: #E9264B; border-color: #E9264B; }
+.btn-primary:hover, .btn-danger:hover { background-color: #C81E3F; border-color: #C81E3F; }
+a { color: #C81E3F; }
+.login-logo img { max-height: 110px; }

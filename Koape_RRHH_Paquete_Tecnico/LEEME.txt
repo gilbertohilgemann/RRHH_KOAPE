@@ -1,0 +1,8 @@
+KOAPE RRHH — PAQUETE TÉCNICO PARA CLAUDE
+
+- Especificacion_Tecnica_Koape_RRHH.md: especificación técnica, modelo funcional y prompt para Claude.
+- Modelo_Datos_Koape_RRHH.dbml: esquema lógico de referencia para dbdiagram.io.
+
+Incluye marcador propio con QR temporal desde móvil, código fijo de empleado y CSV predefinido sin verificación presencial. Adaptar al repositorio real; validar reglas legales oficiales antes de liquidar nóminas reales.
+
+Incluye perfiles de acceso: Administrador, Gestor de RR. HH. y Empleado, con límites de altas/bajas, configuraciones, nóminas, QR propio y protección de históricos cerrados.

@@ -1,0 +1,242 @@
+{% extends "admin/base_site.html" %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+  .manual { max-width: 900px; font-size: 14px; line-height: 1.55; }
+  .manual details { border: 1px solid #d6dde3; border-radius: 8px; margin-bottom: 10px; background: #fff; }
+  .manual summary { cursor: pointer; padding: 10px 14px; font-weight: 600; font-size: 15px; }
+  .manual details[open] summary { border-bottom: 1px solid #e5e9ed; }
+  .manual .cuerpo { padding: 10px 16px 14px; }
+  .manual .tip { background: #ecfdf5; border-left: 4px solid #0f766e; padding: 8px 12px; margin: 10px 0; border-radius: 4px; }
+  .manual .aviso { background: #fff7ed; border-left: 4px solid #c2410c; padding: 8px 12px; margin: 10px 0; border-radius: 4px; }
+  .manual table { border-collapse: collapse; margin: 8px 0; }
+  .manual th, .manual td { border: 1px solid #d6dde3; padding: 4px 8px; text-align: left; vertical-align: top; }
+  .manual code { background: #f1f5f9; padding: 1px 4px; border-radius: 3px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="manual">
+  <p>
+    Este manual es para el <strong>administrador de la plataforma</strong> (Koape): quien crea las empresas,
+    sus primeros usuarios y cuida la base de datos. Las empresas trabajan desde la aplicación; su manual está
+    dentro de ella, en <a href="{{ url_app }}/manual" target="_blank">{{ url_app }}/manual</a>
+    (con sesión iniciada).
+  </p>
+
+  <details open>
+    <summary>1. Primeros pasos: dar de alta una empresa</summary>
+    <div class="cuerpo">
+      <ol>
+        <li>Entrá a <a href="{% url 'admin:plataforma_empresa_add' %}">Empresas → Agregar</a> y cargá el nombre,
+          RUC y los números patronales de IPS y MTESS. En la misma pantalla podés cargar sus sucursales.</li>
+        <li>Creá el primer usuario de la empresa en
+          <a href="{% url 'admin:auth_user_add' %}">Usuarios → Agregar</a>: usuario y contraseña, después
+          completá nombre, en <em>Grupos</em> elegí <strong>Administrador</strong> y abajo, en
+          <em>Perfil</em>, la empresa.</li>
+        <li>Ese administrador ya puede entrar a la aplicación y crear el resto de los usuarios, sucursales,
+          departamentos y empleados.</li>
+      </ol>
+      <div class="tip">💡 Un usuario sin perfil (empresa) y sin grupo no puede entrar a la aplicación.</div>
+      <p><strong>Personalización</strong>: en la ficha de la empresa se pueden cargar su <em>logo</em> y sus
+        <em>colores principal y secundario</em> (#RRGGBB). Vacíos, la empresa ve la identidad de Koape. El
+        administrador de la empresa también los cambia desde la aplicación (Datos de la empresa). El color principal
+        tiene que ser lo bastante oscuro para leer texto blanco encima: si no, no se guarda.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>2. Perfiles y permisos</summary>
+    <div class="cuerpo">
+      <table>
+        <tr><th>Perfil (grupo)</th><th>Qué puede</th></tr>
+        <tr><td><strong>Koape</strong></td><td>Todo, en todas las empresas (plataforma).</td></tr>
+        <tr><td><strong>Administrador</strong></td><td>Todo dentro de su empresa: usuarios y perfiles, sucursales,
+          estructura, alta, edición y baja lógica de empleados, auditoría.</td></tr>
+        <tr><td><strong>Gestor RR. HH.</strong></td><td>Consulta empleados y estructura; carga movimientos
+          (próximas fases). No da de alta ni de baja empleados, usuarios ni sucursales.</td></tr>
+        <tr><td><strong>Empleado</strong></td><td>Solo su propia ficha y lo suyo. Necesita el legajo vinculado
+          en su perfil.</td></tr>
+      </table>
+      <p>Los permisos de cada perfil se ajustan en
+        <a href="{% url 'admin:auth_group_changelist' %}">Autenticación → Grupos</a>, sin tocar código.
+        Para volver a los valores iniciales: <code>manage.py restablecer_perfiles</code>.</p>
+      <p>En el perfil de cada usuario se pueden elegir <strong>sucursales</strong>: si se eligen, solo ve los
+        empleados de esas sucursales; vacío = todas.</p>
+      <div class="aviso">⚠ No asignes el grupo Koape a usuarios de una empresa: verían los datos de todas.</div>
+    </div>
+  </details>
+
+  <details>
+    <summary>3. Empleados (legajos)</summary>
+    <div class="cuerpo">
+      <p>Se consultan en <a href="{% url 'admin:empleados_empleado_changelist' %}">Legajos → Empleados</a>.
+        Lo normal es que los cargue cada empresa desde la aplicación.</p>
+      <ul>
+        <li>Un legajo <strong>nunca se borra</strong>: la baja es lógica y se hace desde la aplicación
+          (botón <em>Dar de baja</em>, con fecha y motivo).</li>
+        <li>Cada cambio de sucursal, departamento, puesto, centro de costo o supervisor queda solo en el
+          <a href="{% url 'admin:empleados_historialasignacion_changelist' %}">historial de asignaciones</a>.</li>
+      </ul>
+    </div>
+  </details>
+
+  <details>
+    <summary>3 bis. Contratos, sueldos, documentos y cuentas</summary>
+    <div class="cuerpo">
+      <ul>
+        <li><a href="{% url 'admin:contratos_esquemasalarial_changelist' %}">Esquemas salariales</a> y
+          <a href="{% url 'admin:empleados_tipodocumento_changelist' %}">tipos de documento</a>: los que tienen la
+          empresa vacía son <strong>globales</strong> (los ven todas las empresas y solo los modifica la plataforma).</li>
+        <li>Contratos, historial salarial, documentos y cuentas bancarias se consultan acá pero se cargan desde la
+          aplicación, que controla estados, solapamientos y aprobaciones.</li>
+        <li>Los documentos son privados (carpeta <code>backend/privado/</code>, incluida en el backup) y los números de
+          cuenta van cifrados con la <code>CLAVE_CIFRADO</code> de <code>backend/.env</code>.</li>
+      </ul>
+      <div class="aviso">⚠ Nunca cambies ni pierdas la <code>CLAVE_CIFRADO</code>: sin ella los números de cuenta guardados
+        no se pueden leer. Los instaladores la generan una sola vez y no la tocan si ya existe.</div>
+    </div>
+  </details>
+
+  <details>
+    <summary>3 ter. Jornada y feriados</summary>
+    <div class="cuerpo">
+      <ul>
+        <li><a href="{% url 'admin:jornada_regimenjornada_changelist' %}">Regímenes de jornada</a>: los globales (diurna,
+          nocturna, mixta) traen máximos de referencia <strong>sin verificar</strong>. Cuando alguien los revise contra la
+          norma vigente, completá la fuente y marcá <em>verificado</em>.</li>
+        <li><a href="{% url 'admin:jornada_calendarioferiados_changelist' %}">Calendarios de feriados</a>: el nacional
+          (empresa vacía) lo ven todas las empresas. Cada año hay que cargar el calendario nuevo y ajustar los feriados
+          trasladados por ley o decreto; después marcalo <em>verificado</em>.</li>
+        <li>Horarios y asignaciones los cargan las empresas desde la aplicación.</li>
+      </ul>
+    </div>
+  </details>
+
+  <details>
+    <summary>3 quater. Marcador de asistencia</summary>
+    <div class="cuerpo">
+      <ul>
+        <li><a href="{% url 'admin:asistencia_configuracionmarcacion_changelist' %}">Configuración del marcador</a> de cada
+          empresa (se crea sola): modalidades habilitadas, vigencia del QR, modo entrada/salida.</li>
+        <li><a href="{% url 'admin:asistencia_terminalmarcacion_changelist' %}">Terminales</a>: la clave de cada una se genera
+          desde la aplicación (se muestra una sola vez; acá solo queda su huella).</li>
+        <li><a href="{% url 'admin:asistencia_marcacion_changelist' %}">Marcaciones</a>,
+          <a href="{% url 'admin:asistencia_intentomarcacion_changelist' %}">intentos rechazados</a> y QR dinámicos de cada terminal: solo
+          consulta. Las marcas nunca se editan ni se borran.</li>
+      </ul>
+      <p><strong>Importación CSV</strong>: <a href="{% url 'admin:asistencia_relojexterno_changelist' %}">relojes externos</a>,
+        <a href="{% url 'admin:asistencia_mapeoempleadoreloj_changelist' %}">códigos de reloj</a>,
+        <a href="{% url 'admin:asistencia_perfilimportacion_changelist' %}">perfiles</a> e
+        <a href="{% url 'admin:asistencia_loteimportacion_changelist' %}">importaciones</a> (con sus filas). Los archivos
+        quedan en <code>backend/privado/importaciones/</code>. Límites: <code>IMPORTACION_MAX_BYTES</code> e
+        <code>IMPORTACION_MAX_FILAS</code> en el .env.</p>
+      <p><strong>Motor de asistencia</strong>: <a href="{% url 'admin:asistencia_diaasistencia_changelist' %}">días de
+        asistencia</a> (los calcula el sistema), <a href="{% url 'admin:asistencia_ajustemarcacion_changelist' %}">ajustes</a> y
+        <a href="{% url 'admin:asistencia_autorizacionhorasextra_changelist' %}">horas extra</a>. Para recalcular por terminal:
+        <code>manage.py calcular_asistencia --desde AAAA-MM-DD --hasta AAAA-MM-DD</code>, o <code>--ayer</code> (conviene
+        programarlo cada noche para que aparezcan las ausencias de los días sin marcas).</p>
+      <div class="aviso">⚠ Los códigos fijos se buscan con un HMAC derivado de la <code>CLAVE_CIFRADO</code>: si esa clave
+        cambiara, todos los códigos fijos dejarían de funcionar (habría que regenerarlos).</div>
+    </div>
+  </details>
+
+  <details>
+    <summary>3 quinquies. Licencias y vacaciones</summary>
+    <div class="cuerpo">
+      <ul>
+        <li><a href="{% url 'admin:licencias_tipolicencia_changelist' %}">Tipos de licencia</a> y
+          <a href="{% url 'admin:licencias_escalavacaciones_changelist' %}">escala de vacaciones</a> globales (empresa vacía): los ven
+          todas las empresas. Vienen como referencia <strong>sin verificar</strong>, con su fuente legal: revisalos y marcá
+          <em>verificado</em>.</li>
+        <li><a href="{% url 'admin:licencias_solicitudlicencia_changelist' %}">Licencias</a> y
+          <a href="{% url 'admin:licencias_movimientovacaciones_changelist' %}">movimientos de vacaciones</a>: solo consulta; se
+          cargan y se aprueban desde la aplicación (aprobar descuenta el saldo y recalcula la asistencia).</li>
+        <li><a href="{% url 'admin:licencias_certificadomedico_changelist' %}">Certificados médicos</a>: sin diagnóstico.</li>
+      </ul>
+    </div>
+  </details>
+
+  <details>
+    <summary>3 sexies. Reglas legales y conceptos de nómina</summary>
+    <div class="cuerpo">
+      <ul>
+        <li><a href="{% url 'admin:legal_conjuntoreglas_changelist' %}">Reglas legales</a>: los conjuntos globales (empresa vacía)
+          los mantiene la plataforma. El de referencia <strong>PY-LABORAL</strong> viene en <em>borrador, sin verificar</em>: hay que
+          revisarlo contra las fuentes oficiales y aprobarlo desde la aplicación (revisa una persona, aprueba otra). Un conjunto
+          revisado o aprobado no se edita desde acá.</li>
+        <li><a href="{% url 'admin:nomina_conceptonomina_changelist' %}">Conceptos de nómina</a>,
+          <a href="{% url 'admin:nomina_reglaconcepto_changelist' %}">reglas de cálculo</a> (las fórmulas se validan: nunca se
+          ejecuta código) y <a href="{% url 'admin:nomina_conceptorecurrente_changelist' %}">conceptos fijos por empleado</a>.</li>
+      </ul>
+      <div class="aviso">⚠ Sin un conjunto de reglas legales aprobado y vigente, la nómina real (fase 10) queda bloqueada.</div>
+    </div>
+  </details>
+
+  <details>
+    <summary>3 septies. Novedades, anticipos y préstamos</summary>
+    <div class="cuerpo">
+      <p><a href="{% url 'admin:novedades_novedad_changelist' %}">Novedades</a>,
+        <a href="{% url 'admin:novedades_descuentoautorizado_changelist' %}">descuentos autorizados</a>,
+        <a href="{% url 'admin:novedades_anticipo_changelist' %}">anticipos</a>,
+        <a href="{% url 'admin:novedades_prestamo_changelist' %}">préstamos</a> y
+        <a href="{% url 'admin:novedades_cuotarecuperacion_changelist' %}">cuotas a descontar</a>: acá solo se consultan.
+        Se cargan, se aprueban, se pagan y se desembolsan desde la aplicación (cada paso queda en la auditoría).</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>3 octies. Nómina</summary>
+    <div class="cuerpo">
+      <p><a href="{% url 'admin:nomina_periodonomina_changelist' %}">Períodos</a>,
+        <a href="{% url 'admin:nomina_corridanomina_changelist' %}">liquidaciones</a>,
+        <a href="{% url 'admin:nomina_liquidacionempleado_changelist' %}">liquidaciones por empleado</a>,
+        <a href="{% url 'admin:nomina_recibosueldo_changelist' %}">recibos</a>,
+        <a href="{% url 'admin:nomina_pagonomina_changelist' %}">pagos</a> y
+        <a href="{% url 'admin:nomina_asignacioncostopatronal_changelist' %}">costo del empleador</a>: solo consulta. Se calculan,
+        aprueban, cierran y rectifican desde la aplicación; una liquidación cerrada no se modifica nunca.</p>
+      <p><a href="{% url 'admin:nomina_liquidacionfinal_changelist' %}">Liquidaciones finales</a> y
+        <a href="{% url 'admin:cumplimiento_presentacionoficial_changelist' %}">planillas MTESS / IPS</a>: también se preparan y
+        se calculan desde la aplicación. El conjunto de reglas legales <strong>PY-EGRESO</strong> (preaviso, indemnización,
+        causales) viene en borrador, sin verificar.</p>
+      <p><a href="{% url 'admin:nomina_secuenciadocumento_changelist' %}">Numeración de documentos</a>: se puede ajustar el
+        prefijo o el próximo número de recibo (ej. para continuar la numeración de un sistema anterior).</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>4. Auditoría</summary>
+    <div class="cuerpo">
+      <p>En <a href="{% url 'admin:core_eventoauditoria_changelist' %}">Núcleo y auditoría → Auditoría</a>
+        queda cada alta, modificación, baja, ingreso (y cada intento fallido de ingreso) y cambio de perfiles,
+        con quién, cuándo y los valores anteriores y nuevos. No se puede editar ni borrar.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>5. Migración de base de datos y backup</summary>
+    <div class="cuerpo">
+      <p>En <a href="{% url 'admin:migracion_migracionbasedatos_changelist' %}">Migración de Base de Datos →
+        Migración</a> (solo superusuarios):</p>
+      <ul>
+        <li><strong>Descargar backup completo</strong>: código, archivos subidos, documentos privados y datos.</li>
+        <li><strong>Migrar a PostgreSQL</strong>, <strong>volver a SQLite</strong> o <strong>traer los datos de
+          PostgreSQL a SQLite</strong> sin cambiar de motor.</li>
+      </ul>
+      <div class="aviso">⚠ El backup tiene datos personales y salariales de todos los empleados: guardalo
+        cifrado o en un lugar con acceso restringido.</div>
+    </div>
+  </details>
+
+  <details>
+    <summary>6. Usuario administrador fijo</summary>
+    <div class="cuerpo">
+      <p>Cada instalación crea (o resetea) el usuario <code>admin</code> con la contraseña
+        <code>Admin*2026</code>, para no perder nunca el acceso.</p>
+      <div class="aviso">⚠ Cambiá esa contraseña apenas entres por primera vez (arriba a la derecha →
+        <em>Cambiar contraseña</em>).</div>
+    </div>
+  </details>
+</div>
+{% endblock %}

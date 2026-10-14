@@ -1,0 +1,42 @@
+@import "tailwindcss";
+
+/* Identidad visual. Los colores de Koape (sacados del logo) son los de la
+   plataforma y los de toda empresa que no cargue los suyos. Cada empresa
+   puede reemplazar --marca y --marca-secundario desde "Datos de la empresa":
+   la app los cambia al entrar (src/marca.ts) y toda la paleta "marca-*" y
+   "acento-*" se recalcula sola a partir de esos dos colores. */
+:root {
+  --marca: #E9264B;
+  --marca-secundario: #F7941D;
+  /* Degradado del logo de Koape (magenta → rojo → naranja → amarillo). */
+  --degradado-marca: linear-gradient(90deg, #D9418A, #E9264B, #F7941D, #EEF01A);
+}
+
+@theme inline {
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --color-marca-50: color-mix(in srgb, var(--marca) 7%, white);
+  --color-marca-100: color-mix(in srgb, var(--marca) 15%, white);
+  --color-marca-200: color-mix(in srgb, var(--marca) 30%, white);
+  --color-marca-400: color-mix(in srgb, var(--marca) 65%, white);
+  --color-marca-600: color-mix(in srgb, var(--marca) 85%, white);
+  --color-marca-700: var(--marca);
+  --color-marca-800: color-mix(in srgb, var(--marca) 80%, black);
+  --color-marca-900: color-mix(in srgb, var(--marca) 60%, black);
+
+  --color-acento-100: color-mix(in srgb, var(--marca-secundario) 18%, white);
+  --color-acento-500: var(--marca-secundario);
+  --color-acento-800: color-mix(in srgb, var(--marca-secundario) 60%, black);
+}
+
+/* Fondo de la aplicación: casi blanco con un toque del color de la marca. */
+.fondo-app {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--marca) 5%, white) 0%, #f5f5f4 45%);
+  min-height: 100vh;
+}
+
+/* Franja superior con el degradado de la marca. */
+.franja-marca {
+  height: 4px;
+  background: var(--degradado-marca);
+}

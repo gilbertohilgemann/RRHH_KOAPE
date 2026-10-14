@@ -1,0 +1,5 @@
+# Generado por start.sh / start.ps1 (PIDs y logs de los procesos en segundo plano)
+.run/
+logs/
+# Configuración local de Claude Code (permisos de esta PC)
+.claude/settings.local.json

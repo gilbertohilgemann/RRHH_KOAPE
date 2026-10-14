@@ -1,0 +1,111 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block content %}
+<div style="max-width: 720px;">
+
+  <p style="font-size: 14px;">
+    Base de datos en uso actualmente:
+    {% if current_engine == 'postgres' %}
+      <strong style="color: #0a7c2f;">PostgreSQL</strong>
+    {% else %}
+      <strong style="color: #2f5aa0;">SQLite</strong>
+    {% endif %}
+  </p>
+
+  <fieldset class="module aligned" style="margin-bottom: 20px;">
+    <h2>Backup completo</h2>
+    <div class="description" style="padding: 10px 12px;">
+      Descarga un .zip con todo el código del sistema (backend y frontend), los archivos
+      subidos (también los documentos confidenciales del legajo) y los datos actuales: la
+      base SQLite si la estás usando, o un volcado SQL de PostgreSQL listo para restaurar si
+      estás en Postgres. <strong>Contiene datos personales y salariales: guardalo en un lugar seguro.</strong>
+      Puede tardar un rato, no cierres la página mientras se genera.
+    </div>
+    <div class="submit-row">
+      <a href="{% url 'admin:migracion_backup' %}" class="button default">Descargar backup completo</a>
+    </div>
+  </fieldset>
+
+  {% if current_engine == 'sqlite' %}
+    <fieldset class="module aligned">
+      <h2>Migrar a PostgreSQL</h2>
+      <div class="description" style="padding: 10px 12px;">
+        Copia todos los datos actuales de SQLite a PostgreSQL, crea la estructura de tablas,
+        y hace que el sistema empiece a usar PostgreSQL. Los datos de SQLite no se borran.
+      </div>
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="migrate_to_postgres">
+
+        <div class="form-row">
+          <div><label>Host</label><input type="text" name="host" value="{{ defaults.host }}"></div>
+        </div>
+        <div class="form-row">
+          <div><label>Puerto</label><input type="text" name="port" value="{{ defaults.port }}"></div>
+        </div>
+        <div class="form-row">
+          <div><label>Base de datos</label><input type="text" name="dbname" value="{{ defaults.dbname }}" required></div>
+        </div>
+        <div class="form-row">
+          <div><label>Usuario</label><input type="text" name="user" value="{{ defaults.user }}" required></div>
+        </div>
+        <div class="form-row">
+          <div><label>Contraseña</label><input type="password" name="password" required></div>
+        </div>
+
+        <div class="description" style="padding: 10px 12px; margin-top: 10px;">
+          Opcional — si la base y el usuario de arriba <strong>todavía no existen</strong>,
+          completá estas credenciales de administrador de Postgres para que se creen automáticamente.
+          Si ya los creaste vos (por ejemplo en pgAdmin), dejalo vacío.
+        </div>
+        <div class="form-row">
+          <div><label>Usuario admin</label><input type="text" name="admin_user" placeholder="postgres"></div>
+        </div>
+        <div class="form-row">
+          <div><label>Contraseña admin</label><input type="password" name="admin_password"></div>
+        </div>
+
+        <div class="submit-row">
+          <input type="submit" value="Migrar a PostgreSQL" class="default"
+                 onclick="return confirm('¿Migrar todos los datos a PostgreSQL ahora?');">
+        </div>
+      </form>
+    </fieldset>
+  {% else %}
+    <fieldset class="module aligned">
+      <h2>Volver a SQLite</h2>
+      <div class="description" style="padding: 10px 12px;">
+        El sistema vuelve a usar el archivo SQLite de siempre, tal como estaba antes de migrar.
+      </div>
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="switch_to_sqlite">
+        <div class="submit-row">
+          <input type="submit" value="Volver a SQLite"
+                 onclick="return confirm('¿Volver a usar SQLite?');">
+        </div>
+      </form>
+    </fieldset>
+
+    <fieldset class="module aligned" style="margin-top: 20px;">
+      <h2>Traer los datos de Postgres de vuelta a SQLite</h2>
+      <div class="description" style="padding: 10px 12px;">
+        Copia lo que hay <strong>ahora en PostgreSQL</strong> hacia el archivo SQLite,
+        reemplazando lo que tenga guardado. Útil antes de armar un backup para llevar los
+        datos reales a otra PC o servidor, o si cargaste cosas mientras estabas en Postgres
+        y no querés perderlas al volver. No cambia todavía qué base usa el sistema.
+      </div>
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="sync_postgres_to_sqlite">
+        <div class="submit-row">
+          <input type="submit" value="Copiar datos de Postgres a SQLite"
+                 onclick="return confirm('Esto reemplaza el contenido actual de SQLite con lo que hay en Postgres. ¿Continuar?');">
+        </div>
+      </form>
+    </fieldset>
+  {% endif %}
+
+</div>
+{% endblock %}

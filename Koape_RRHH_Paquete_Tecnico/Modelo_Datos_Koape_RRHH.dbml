@@ -1,0 +1,685 @@
+// Koape RRHH — modelo DBML de referencia para dbdiagram.io
+// Adaptar a esquema real; no duplicar Company/Branch/User/AuditLog si ya existen.
+
+Table Employee {
+  internalId bigint [pk, increment]
+  CompanyId bigint [not null]
+  EmployeeCode varchar(50) [not null]
+  DocumentType varchar(20)
+  DocumentNumber varchar(50)
+  FirstName varchar(100) [not null]
+  LastName varchar(100) [not null]
+  MiddleName varchar(100)
+  SecondLastName varchar(100)
+  HireDate date [not null]
+  TerminationDate date
+  EmploymentStatus varchar(30) [not null]
+  BranchId bigint
+  DepartmentId bigint
+  PositionId bigint
+  CostCenterId bigint
+  SupervisorEmployeeId bigint
+  CreatedAt datetime
+  CreatedBy bigint
+  UpdatedAt datetime
+  UpdatedBy bigint
+  IsActive boolean [not null, default: true]
+  indexes { (CompanyId, EmployeeCode) [unique] }
+}
+
+Table Department {
+  internalId bigint [pk, increment]
+  CompanyId bigint [not null]
+  Code varchar(50) [not null]
+  Name varchar(150) [not null]
+  ParentDepartmentId bigint
+  ManagerEmployeeId bigint
+  IsActive boolean [not null, default: true]
+  indexes { (CompanyId, Code) [unique] }
+}
+
+Table Position {
+  internalId bigint [pk, increment]
+  CompanyId bigint [not null]
+  Code varchar(50) [not null]
+  Name varchar(150) [not null]
+  Description text
+  IsActive boolean [not null, default: true]
+}
+
+Table CostCenter {
+  internalId bigint [pk, increment]
+  CompanyId bigint [not null]
+  Code varchar(50) [not null]
+  Name varchar(150) [not null]
+  ParentCostCenterId bigint
+  IsActive boolean [not null, default: true]
+}
+
+Table EmployeeContract {
+  internalId bigint [pk, increment]
+  CompanyId bigint [not null]
+  EmployeeId bigint [not null]
+  ContractNumber varchar(80)
+  ContractType varchar(40) [not null]
+  StartDate date [not null]
+  EndDate date
+  WorkRegimeId bigint
+  WorkScheduleId bigint
+  SalarySchemeId bigint
+  PaymentFrequency varchar(30) [not null]
+  SalaryAmount decimal(18,2)
+  CurrencyCode char(3) [not null, default: 'PYG']
+  SocialSecurityRegimeId bigint
+  Status varchar(30) [not null]
+  TerminationReason varchar(200)
+}
+
+Table EmployeeSalaryHistory {
+  internalId bigint [pk, increment]
+  CompanyId bigint [not null]
+  EmployeeId bigint [not null]
+  EmployeeContractId bigint [not null]
+  ValidFrom date [not null]
+  ValidTo date
+  SalarySchemeId bigint [not null]
+  BaseSalary decimal(18,2) [not null]
+  HourlyRate decimal(18,4)
+  DailyRate decimal(18,4)
+  CurrencyCode char(3) [not null, default: 'PYG']
+  PaymentFrequency varchar(30) [not null]
+  Reason text
+  ApprovedBy bigint
+  ApprovedAt datetime
+}
+
+Table WorkRegime {
+  internalId bigint [pk, increment]
+  Code varchar(50) [not null, unique]
+  Name varchar(120) [not null]
+  DayType varchar(20) [not null]
+  LegalRuleSetId bigint
+  MaxDailyMinutes int
+  MaxWeeklyMinutes int
+  IsActive boolean [not null, default: true]
+}
+
+Table WorkSchedule {
+  internalId bigint [pk, increment]
+  CompanyId bigint [not null]
+  Code varchar(50) [not null]
+  Name varchar(120) [not null]
+  WorkRegimeId bigint [not null]
+  GraceMinutes int [not null, default: 0]
+  CrossesMidnight boolean [not null, default: false]
+  EffectiveFrom date
+  EffectiveTo date
+  IsActive boolean [not null, default: true]
+  indexes { (CompanyId, Code) [unique] }
+}
+
+Table WorkScheduleDay {
+  internalId bigint [pk, increment]
+  WorkScheduleId bigint [not null]
+  DayOfWeek int [not null]
+  StartTime time
+  EndTime time
+  BreakMinutes int [not null, default: 0]
+  IsWorkday boolean [not null, default: true]
+  Sequence int [not null, default: 1]
+}
+
+Table TimeClockDevice {
+  internalId bigint [pk, increment]
+  CompanyId bigint [not null]
+  Code varchar(50) [not null]
+  Name varchar(120) [not null]
+  Manufacturer varchar(100)
+  Model varchar(100)
+  DeviceSerial varchar(100)
+  TimeZoneId varchar(80)
+  ImportProfileId bigint
+  IsActive boolean [not null, default: true]
+  indexes { (CompanyId, Code) [unique] }
+}
+
+Table TimeClockEmployeeMap {
+  internalId bigint [pk, increment]
+  CompanyId bigint [not null]
+  TimeClockDeviceId bigint [not null]
+  DeviceEmployeeCode varchar(80) [not null]
+  EmployeeId bigint [not null]
+  ValidFrom date
+  ValidTo date
+  Notes text
+}
+
+Table AttendanceTerminal {
+  internalId bigint [pk, increment]
+  CompanyId bigint [not null]
+  TerminalCode varchar(50) [not null]
+  Name varchar(120) [not null]
+  Location varchar(150)
+  TerminalType varchar(30) [not null]
+  AllowedMethods text
+  DeviceSecretHash varchar(255)
+  TimeZoneId varchar(80)
+  IsActive boolean [not null, default: true]
+  LastSeenAt datetime
+  CreatedAt datetime
+  CreatedBy bigint
+  UpdatedAt datetime
+  UpdatedBy bigint
+  indexes { (CompanyId, TerminalCode) [unique] }
+}
+
+Table EmployeeAttendanceCredential {
+  internalId bigint [pk, increment]
+  CompanyId bigint [not null]
+  EmployeeId bigint [not null]
+  AttendanceCode varchar(100) [not null]
+  CodeVersion int [not null, default: 1]
+  ValidFrom date
+  ValidTo date
+  Status varchar(30) [not null]
+  CreatedAt datetime
+  CreatedBy bigint
+  RevokedAt datetime
+  RevokedBy bigint
+  indexes { (CompanyId, AttendanceCode) [unique] }
+}
+
+Table AttendanceQrToken {
+  internalId bigint [pk, increment]
+  CompanyId bigint [not null]
+  EmployeeId bigint [not null]
+  TokenHash varchar(128) [not null, unique]
+  RequestedAt datetime [not null]
+  ExpiresAt datetime [not null]
+  ConsumedAt datetime
+  CancelledAt datetime
+  RequestedByUserId bigint [not null]
+  Status varchar(30) [not null]
+  TerminalId bigint
+  RequestSessionId varchar(255)
+  AttemptCount int [not null, default: 0]
+  LastAttemptAt datetime
+  LastFailureReason varchar(255)
+  indexes { (CompanyId, EmployeeId, Status, ExpiresAt) }
+}
+
+Table AttendanceImportProfile {
+  internalId bigint [pk, increment]
+  CompanyId bigint [not null]
+  Code varchar(50) [not null]
+  Name varchar(120) [not null]
+  Delimiter varchar(5) [not null, default: ';']
+  Encoding varchar(30) [not null, default: 'UTF-8']
+  HasHeader boolean [not null, default: true]
+  DateFormat varchar(50)
+  TimeFormat varchar(50)
+  EmployeeCodeColumn varchar(100)
+  TimestampColumn varchar(100)
+  DateColumn varchar(100)
+  TimeColumn varchar(100)
+  PunchTypeColumn varchar(100)
+  EventIdColumn varchar(100)
+  ColumnMappingJson text
+  DuplicateStrategy varchar(30) [not null, default: 'IgnoreExact']
+  Version int [not null, default: 1]
+  IsActive boolean [not null, default: true]
+}
+
+Table AttendanceImportBatch {
+  internalId bigint [pk, increment]
+  CompanyId bigint [not null]
+  TimeClockDeviceId bigint
+  AttendanceImportProfileId bigint [not null]
+  OriginalFileName varchar(255) [not null]
+  StorageKey varchar(500)
+  FileChecksum varchar(128) [not null]
+  FileSizeBytes bigint
+  UploadedAt datetime [not null]
+  UploadedBy bigint [not null]
+  PeriodFrom date
+  PeriodTo date
+  Status varchar(30) [not null]
+  ImportMode varchar(30) [not null, default: 'PredefinedCSV']
+  IdentityCheckPerformed boolean [not null, default: false]
+  ImportPolicyVersion int
+  OperatorNotes text
+  TotalRows int [not null, default: 0]
+  AcceptedRows int [not null, default: 0]
+  RejectedRows int [not null, default: 0]
+  DuplicateRows int [not null, default: 0]
+  CommittedAt datetime
+  CommittedBy bigint
+  ErrorSummary text
+}
+
+Table AttendanceImportRow {
+  internalId bigint [pk, increment]
+  CompanyId bigint [not null]
+  AttendanceImportBatchId bigint [not null]
+  RowNumber int [not null]
+  RawRowJson text
+  DeviceEmployeeCode varchar(80)
+  EmployeeId bigint
+  PunchDateTime datetime
+  PunchType varchar(30)
+  DeviceEventId varchar(120)
+  NormalizedHash varchar(128)
+  ValidationStatus varchar(30) [not null]
+  ValidationMessages text
+  AttendancePunchId bigint
+  indexes { (AttendanceImportBatchId, RowNumber) [unique] }
+}
+
+Table AttendancePunch {
+  internalId bigint [pk, increment]
+  CompanyId bigint [not null]
+  EmployeeId bigint [not null]
+  TimeClockDeviceId bigint
+  PunchDateTime datetime [not null]
+  PunchType varchar(30) [not null]
+  SourceType varchar(30) [not null]
+  SourceBatchId bigint
+  SourceRowId bigint
+  ExternalEventId varchar(120)
+  DeduplicationHash varchar(128) [not null]
+  IsManualCorrection boolean [not null, default: false]
+  CorrectionReason text
+  CorrectedFromPunchId bigint
+  CreatedAt datetime
+  CreatedBy bigint
+  ApprovedBy bigint
+  indexes { (CompanyId, EmployeeId, PunchDateTime) }
+}
+
+Table AttendanceDay {
+  internalId bigint [pk, increment]
+  CompanyId bigint [not null]
+  EmployeeId bigint [not null]
+  WorkDate date [not null]
+  WorkScheduleId bigint
+  FirstIn datetime
+  LastOut datetime
+  WorkedMinutes int [not null, default: 0]
+  BreakMinutes int [not null, default: 0]
+  LateMinutes int [not null, default: 0]
+  EarlyLeaveMinutes int [not null, default: 0]
+  OrdinaryMinutes int [not null, default: 0]
+  OvertimeCandidateMinutes int [not null, default: 0]
+  NightMinutes int [not null, default: 0]
+  HolidayMinutes int [not null, default: 0]
+  MissingPunchCount int [not null, default: 0]
+  AttendanceStatus varchar(30) [not null]
+  CalculationVersion int [not null, default: 1]
+  CalculatedAt datetime
+  ReviewedBy bigint
+  ReviewedAt datetime
+}
+
+Table LeaveType {
+  internalId bigint [pk, increment]
+  CompanyId bigint
+  Code varchar(50) [not null]
+  Name varchar(120) [not null]
+  LeaveCategory varchar(40) [not null]
+  IsPaid boolean [not null, default: false]
+  ConsumesVacationBalance boolean [not null, default: false]
+  RequiresDocument boolean [not null, default: false]
+  RequiresApproval boolean [not null, default: true]
+  PayrollTreatmentRuleId bigint
+  LegalRuleSetId bigint
+  IsActive boolean [not null, default: true]
+}
+
+Table LeaveRequest {
+  internalId bigint [pk, increment]
+  CompanyId bigint [not null]
+  EmployeeId bigint [not null]
+  LeaveTypeId bigint [not null]
+  StartDate date [not null]
+  EndDate date [not null]
+  RequestedDays decimal(8,2)
+  RequestedMinutes int
+  Reason text
+  SupportingDocumentId bigint
+  Status varchar(30) [not null]
+  RequestedAt datetime
+  ApprovedBy bigint
+  ApprovedAt datetime
+}
+
+Table VacationMovement {
+  internalId bigint [pk, increment]
+  CompanyId bigint [not null]
+  EmployeeId bigint [not null]
+  MovementDate date [not null]
+  MovementType varchar(30) [not null]
+  Days decimal(8,2) [not null]
+  LeaveRequestId bigint
+  PayrollRunId bigint
+  Reason text
+  ApprovedBy bigint
+}
+
+Table SalaryScheme {
+  internalId bigint [pk, increment]
+  CompanyId bigint
+  Code varchar(50) [not null]
+  Name varchar(120) [not null]
+  CalculationBasis varchar(30) [not null]
+  PaymentFrequency varchar(30) [not null]
+  IsActive boolean [not null, default: true]
+}
+
+Table PayrollConcept {
+  internalId bigint [pk, increment]
+  CompanyId bigint
+  Code varchar(50) [not null]
+  Name varchar(150) [not null]
+  ConceptType varchar(40) [not null]
+  CalculationType varchar(40) [not null]
+  DefaultBase varchar(50)
+  DefaultRate decimal(12,6)
+  AffectsNetPay boolean [not null, default: true]
+  AffectsAguinaldoBase boolean
+  AffectsVacationBase boolean
+  AffectsSocialSecurityBase boolean
+  AffectsEmployerCost boolean
+  IsRecurring boolean [not null, default: false]
+  RequiresApproval boolean [not null, default: false]
+  IsActive boolean [not null, default: true]
+}
+
+Table LegalRuleSet {
+  internalId bigint [pk, increment]
+  Code varchar(80) [not null]
+  Name varchar(150) [not null]
+  CountryCode char(2) [not null, default: 'PY']
+  RegimeCode varchar(80)
+  ValidFrom date [not null]
+  ValidTo date
+  SourceName varchar(150)
+  SourceNumber varchar(100)
+  SourceUrl varchar(500)
+  VerifiedBy bigint
+  VerifiedAt datetime
+  Status varchar(30) [not null]
+  Notes text
+}
+
+Table LegalParameter {
+  internalId bigint [pk, increment]
+  LegalRuleSetId bigint [not null]
+  ParameterCode varchar(100) [not null]
+  ParameterName varchar(150) [not null]
+  NumericValue decimal(18,6)
+  TextValue text
+  JsonValue text
+  Unit varchar(40)
+  ValidFrom date
+  ValidTo date
+  SourceReference varchar(255)
+}
+
+Table SocialSecurityRegime {
+  internalId bigint [pk, increment]
+  Code varchar(80) [not null]
+  Name varchar(150) [not null]
+  EmployeeRate decimal(9,6)
+  EmployerRate decimal(9,6)
+  ValidFrom date [not null]
+  ValidTo date
+  SourceReference varchar(255)
+  IsActive boolean [not null, default: true]
+}
+
+Table PayrollPeriod {
+  internalId bigint [pk, increment]
+  CompanyId bigint [not null]
+  Code varchar(80) [not null]
+  PeriodType varchar(30) [not null]
+  StartDate date [not null]
+  EndDate date [not null]
+  PaymentDate date
+  Status varchar(30) [not null]
+  CreatedBy bigint
+  ClosedAt datetime
+  ClosedBy bigint
+}
+
+Table PayrollRun {
+  internalId bigint [pk, increment]
+  CompanyId bigint [not null]
+  PayrollPeriodId bigint [not null]
+  RunNumber int [not null]
+  RunType varchar(40) [not null]
+  CalculationVersion int [not null]
+  LegalRuleSetId bigint
+  Status varchar(30) [not null]
+  EmployeeCount int [not null, default: 0]
+  GrossTotal decimal(18,2) [not null, default: 0]
+  EmployeeDeductionsTotal decimal(18,2) [not null, default: 0]
+  EmployeeContributionsTotal decimal(18,2) [not null, default: 0]
+  NetTotal decimal(18,2) [not null, default: 0]
+  EmployerContributionsTotal decimal(18,2) [not null, default: 0]
+  OtherEmployerCostTotal decimal(18,2) [not null, default: 0]
+  TotalEmployerCost decimal(18,2) [not null, default: 0]
+  CalculatedAt datetime
+  CalculatedBy bigint
+  ApprovedBy bigint
+  ApprovedAt datetime
+  ClosedAt datetime
+  ClosedBy bigint
+  ParentPayrollRunId bigint
+  RectificationReason text
+}
+
+Table PayrollEmployee {
+  internalId bigint [pk, increment]
+  CompanyId bigint [not null]
+  PayrollRunId bigint [not null]
+  EmployeeId bigint [not null]
+  EmployeeContractId bigint
+  WorkDays decimal(8,2)
+  PaidDays decimal(8,2)
+  UnpaidDays decimal(8,2)
+  OrdinaryMinutes int
+  OvertimeMinutes int
+  GrossPay decimal(18,2) [not null, default: 0]
+  EmployeeDeductions decimal(18,2) [not null, default: 0]
+  EmployeeContributions decimal(18,2) [not null, default: 0]
+  NetPay decimal(18,2) [not null, default: 0]
+  EmployerContributions decimal(18,2) [not null, default: 0]
+  EmployerOtherCosts decimal(18,2) [not null, default: 0]
+  TotalEmployerCost decimal(18,2) [not null, default: 0]
+  CalculationStatus varchar(30) [not null]
+  CalculationWarnings text
+  PaymentStatus varchar(30)
+  PaidAt datetime
+  indexes { (PayrollRunId, EmployeeId) [unique] }
+}
+
+Table PayrollLine {
+  internalId bigint [pk, increment]
+  CompanyId bigint [not null]
+  PayrollEmployeeId bigint [not null]
+  PayrollConceptId bigint
+  ConceptCodeSnapshot varchar(50) [not null]
+  ConceptNameSnapshot varchar(150) [not null]
+  ConceptTypeSnapshot varchar(40) [not null]
+  Quantity decimal(18,6)
+  Rate decimal(18,6)
+  BaseAmount decimal(18,2)
+  CalculatedAmount decimal(18,2) [not null]
+  SignedAmount decimal(18,2) [not null]
+  CurrencyCode char(3) [not null, default: 'PYG']
+  RuleVersionId bigint
+  CalculationExplanation text
+  SourceType varchar(40)
+  SourceRecordId bigint
+  IsManualOverride boolean [not null, default: false]
+  OverrideReason text
+  ApprovedBy bigint
+}
+
+Table PayrollPayment {
+  internalId bigint [pk, increment]
+  CompanyId bigint [not null]
+  PayrollRunId bigint [not null]
+  PayrollEmployeeId bigint [not null]
+  PaymentDate date [not null]
+  Amount decimal(18,2) [not null]
+  CurrencyCode char(3) [not null, default: 'PYG']
+  PaymentMethod varchar(30) [not null]
+  Reference varchar(150)
+  Status varchar(30) [not null]
+  PaidBy bigint
+  ConfirmedAt datetime
+}
+
+Table EmployeeAdvance {
+  internalId bigint [pk, increment]
+  CompanyId bigint [not null]
+  EmployeeId bigint [not null]
+  AdvanceDate date [not null]
+  RequestedAmount decimal(18,2) [not null]
+  ApprovedAmount decimal(18,2)
+  PaidAmount decimal(18,2)
+  CurrencyCode char(3) [not null, default: 'PYG']
+  Status varchar(30) [not null]
+  ApprovedBy bigint
+  PaidAt datetime
+  Balance decimal(18,2)
+}
+
+Table EmployeeLoan {
+  internalId bigint [pk, increment]
+  CompanyId bigint [not null]
+  EmployeeId bigint [not null]
+  LoanDate date [not null]
+  PrincipalAmount decimal(18,2) [not null]
+  InstallmentCount int [not null]
+  InstallmentAmount decimal(18,2) [not null]
+  OutstandingBalance decimal(18,2) [not null]
+  Status varchar(30) [not null]
+  ApprovedBy bigint
+}
+
+Table EmployeeLoanInstallment {
+  internalId bigint [pk, increment]
+  CompanyId bigint [not null]
+  EmployeeLoanId bigint [not null]
+  PayrollPeriodId bigint [not null]
+  DueAmount decimal(18,2) [not null]
+  AppliedAmount decimal(18,2) [not null, default: 0]
+  Balance decimal(18,2) [not null]
+  Status varchar(30) [not null]
+  PayrollRunId bigint
+}
+
+Table AguinaldoAccrual {
+  internalId bigint [pk, increment]
+  CompanyId bigint [not null]
+  EmployeeId bigint [not null]
+  CalendarYear int [not null]
+  EligibleRemunerationTotal decimal(18,2) [not null, default: 0]
+  AccruedAmount decimal(18,2) [not null, default: 0]
+  PaidAmount decimal(18,2) [not null, default: 0]
+  Balance decimal(18,2) [not null, default: 0]
+  LegalRuleSetId bigint
+  Status varchar(30) [not null]
+  indexes { (CompanyId, EmployeeId, CalendarYear) [unique] }
+}
+
+Table FinalSettlement {
+  internalId bigint [pk, increment]
+  CompanyId bigint [not null]
+  EmployeeId bigint [not null]
+  EmployeeContractId bigint [not null]
+  TerminationDate date [not null]
+  TerminationReason varchar(100)
+  SettlementDate date
+  LegalRuleSetId bigint
+  SalaryPending decimal(18,2)
+  VacationPay decimal(18,2)
+  AguinaldoProportional decimal(18,2)
+  NoticePay decimal(18,2)
+  SeverancePay decimal(18,2)
+  OtherEarnings decimal(18,2)
+  AuthorizedDeductions decimal(18,2)
+  GrossSettlement decimal(18,2)
+  NetSettlement decimal(18,2)
+  CalculationExplanation text
+  Status varchar(30) [not null]
+  ApprovedBy bigint
+  ApprovedAt datetime
+  PayrollRunId bigint
+}
+
+Table EmployerCostAllocation {
+  internalId bigint [pk, increment]
+  CompanyId bigint [not null]
+  EmployeeId bigint [not null]
+  PayrollPeriodId bigint [not null]
+  PayrollRunId bigint [not null]
+  CostCenterId bigint
+  GrossRemuneration decimal(18,2) [not null, default: 0]
+  EmployerSocialContribution decimal(18,2) [not null, default: 0]
+  EmployerBenefits decimal(18,2) [not null, default: 0]
+  EmployerInsurance decimal(18,2) [not null, default: 0]
+  OtherEmployerCost decimal(18,2) [not null, default: 0]
+  TotalEmployerCost decimal(18,2) [not null, default: 0]
+  CurrencyCode char(3) [not null, default: 'PYG']
+}
+
+Ref: Employee.DepartmentId > Department.internalId
+Ref: Employee.PositionId > Position.internalId
+Ref: Employee.CostCenterId > CostCenter.internalId
+Ref: Employee.SupervisorEmployeeId > Employee.internalId
+Ref: Department.ParentDepartmentId > Department.internalId
+Ref: CostCenter.ParentCostCenterId > CostCenter.internalId
+Ref: EmployeeContract.EmployeeId > Employee.internalId
+Ref: EmployeeSalaryHistory.EmployeeId > Employee.internalId
+Ref: EmployeeSalaryHistory.EmployeeContractId > EmployeeContract.internalId
+Ref: WorkSchedule.WorkRegimeId > WorkRegime.internalId
+Ref: WorkScheduleDay.WorkScheduleId > WorkSchedule.internalId
+Ref: TimeClockEmployeeMap.TimeClockDeviceId > TimeClockDevice.internalId
+Ref: TimeClockEmployeeMap.EmployeeId > Employee.internalId
+Ref: AttendanceImportBatch.AttendanceImportProfileId > AttendanceImportProfile.internalId
+Ref: AttendanceImportRow.AttendanceImportBatchId > AttendanceImportBatch.internalId
+Ref: AttendanceImportRow.AttendancePunchId > AttendancePunch.internalId
+Ref: AttendancePunch.EmployeeId > Employee.internalId
+Ref: AttendancePunch.SourceBatchId > AttendanceImportBatch.internalId
+Ref: AttendanceDay.EmployeeId > Employee.internalId
+Ref: LeaveRequest.EmployeeId > Employee.internalId
+Ref: LeaveRequest.LeaveTypeId > LeaveType.internalId
+Ref: VacationMovement.EmployeeId > Employee.internalId
+Ref: PayrollRun.PayrollPeriodId > PayrollPeriod.internalId
+Ref: PayrollRun.LegalRuleSetId > LegalRuleSet.internalId
+Ref: PayrollEmployee.PayrollRunId > PayrollRun.internalId
+Ref: PayrollEmployee.EmployeeId > Employee.internalId
+Ref: PayrollEmployee.EmployeeContractId > EmployeeContract.internalId
+Ref: PayrollLine.PayrollEmployeeId > PayrollEmployee.internalId
+Ref: PayrollLine.PayrollConceptId > PayrollConcept.internalId
+Ref: PayrollPayment.PayrollEmployeeId > PayrollEmployee.internalId
+Ref: EmployeeAdvance.EmployeeId > Employee.internalId
+Ref: EmployeeLoan.EmployeeId > Employee.internalId
+Ref: EmployeeLoanInstallment.EmployeeLoanId > EmployeeLoan.internalId
+Ref: EmployeeLoanInstallment.PayrollPeriodId > PayrollPeriod.internalId
+Ref: AguinaldoAccrual.EmployeeId > Employee.internalId
+Ref: FinalSettlement.EmployeeId > Employee.internalId
+Ref: FinalSettlement.EmployeeContractId > EmployeeContract.internalId
+Ref: EmployerCostAllocation.EmployeeId > Employee.internalId
+Ref: EmployerCostAllocation.PayrollPeriodId > PayrollPeriod.internalId
+Ref: EmployerCostAllocation.PayrollRunId > PayrollRun.internalId
+
+Ref: EmployeeAttendanceCredential.EmployeeId > Employee.internalId
+Ref: AttendanceQrToken.EmployeeId > Employee.internalId
+Ref: AttendanceQrToken.TerminalId > AttendanceTerminal.internalId
+Ref: AttendancePunch.AttendanceTerminalId > AttendanceTerminal.internalId
+Ref: AttendancePunch.CredentialId > EmployeeAttendanceCredential.internalId
+Ref: AttendancePunch.QrTokenId > AttendanceQrToken.internalId
