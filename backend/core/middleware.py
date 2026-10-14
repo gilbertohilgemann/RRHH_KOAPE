@@ -6,10 +6,9 @@ from django.http import Http404
 
 class AdminSoloPorHost:
     """El admin de la plataforma responde solo cuando se lo pide por una de
-    las direcciones de `ADMIN_HOSTS` (ej. "1.2.3.4:8004"); por cualquier otra
-    (el dominio de la app) responde 404, como si no existiera. Es la segunda
-    barrera: nginx no lo publica en el dominio, pero si esa configuración
-    fallara, Django igual lo niega (mismo criterio que KOAPE-PORCINO).
+    las direcciones de `ADMIN_HOSTS` (en el servidor: el dominio, a pedido del
+    cliente, y "ip:puerto"); por cualquier otra responde 404, como si no
+    existiera. Es una segunda barrera además de nginx.
 
     Con `ADMIN_HOSTS` vacío (desarrollo local) no restringe nada.
     """

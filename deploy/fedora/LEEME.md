@@ -9,12 +9,11 @@ interno **8014**), con HTTPS de Let's Encrypt. Cada empresa entra por su direcci
 **usuario limitado**; root solo se usa para preparar el servidor, sacar el
 certificado y pasar a PostgreSQL.
 
-**El admin no está en el dominio**: `hhrr.koapesystem.com/admin/` responde
-404. Se entra solo por **`https://2.25.106.83:8006/admin/`**, con un
-certificado propio (el navegador avisa la primera vez y se acepta; si se entra
-con `http://`, se pasa solo a `https://`). Lo cierran dos barreras: nginx (que
-no lo publica en el dominio) y Django (`ADMIN_HOSTS` en `backend/.env`). Al
-preparar el servidor se puede limitar ese puerto a ciertas IPs. Los puertos
+**El admin** se entra por **`https://hhrr.koapesystem.com/admin/`** (pedido del cliente, 14/10/2026) y
+también por **`https://2.25.106.83:8006/admin/`**, con un certificado propio (el navegador avisa la primera
+vez y se acepta; si se entra con `http://`, se pasa solo a `https://`). Django solo lo atiende por las
+direcciones de `ADMIN_HOSTS` en `backend/.env` (el dominio y la ip:puerto). Al preparar el servidor se puede
+limitar el puerto 8006 a ciertas IPs (el acceso por el dominio no se limita por IP). Los puertos
 están en `comun.sh` (`PUERTO_GUNICORN`, `PUERTO_ADMIN`); en el VPS de PORCINO, el 8001, 8002 y 8012
 son de las otras aplicaciones.
 
@@ -128,7 +127,8 @@ Un solo `.tar.gz` (solo para root) con el proyecto (sin `venv`, `node_modules`, 
 
 ### 5. Primer ingreso
 
-Entrá a `https://2.25.106.83:8006/admin/` con el usuario `admin` y **cambiá la contraseña**.
+Entrá a `https://hhrr.koapesystem.com/admin/` (o `https://2.25.106.83:8006/admin/`) con el usuario `admin` y
+**cambiá la contraseña**.
 El manual del administrador está en el menú del admin; el de cada perfil, en el botón *Manual* de la aplicación.
 Después, en *Empresas*, cargá cada empresa con su **Dirección de acceso** (ej. `delacosta`).
 

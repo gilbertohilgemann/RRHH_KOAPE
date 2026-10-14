@@ -59,8 +59,8 @@ if [ ! -f .env ]; then
         echo "CSRF_TRUSTED_ORIGINS=${URL},${URL_ADMIN}"
         echo "CORS_ALLOWED_ORIGINS=${URL}"
         echo "URL_APP=${URL}"
-        echo "# El admin responde SOLO pedido por esta dirección (ip:puerto); por el dominio, 404."
-        echo "ADMIN_HOSTS=${IP_ADMIN}:${PUERTO_ADMIN}"
+        echo "# El admin responde SOLO pedido por estas direcciones (el dominio y ip:puerto); por otra, 404."
+        echo "ADMIN_HOSTS=${DOMINIO},${IP_ADMIN}:${PUERTO_ADMIN}"
         echo "# Hasta tener el certificado (3-certificado.sh) queda en False; ese script lo pasa a True."
         echo "SECURE_SSL_REDIRECT=False"
         if [ "$MOTOR" = "PostgreSQL" ]; then
@@ -74,6 +74,11 @@ if [ ! -f .env ]; then
     ok "backend/.env creado (${MOTOR}, ${DOMINIO})."
 else
     ok "backend/.env ya existía: no se toca."
+    # Instalaciones anteriores al admin en el dominio: se suma el dominio a ADMIN_HOSTS (lo demás no se toca).
+    if grep -q '^ADMIN_HOSTS=' .env && ! grep -q "^ADMIN_HOSTS=.*${DOMINIO}" .env; then
+        sed -i "s|^ADMIN_HOSTS=|ADMIN_HOSTS=${DOMINIO},|" .env
+        ok "Admin habilitado también en https://${DOMINIO}/admin/ (ADMIN_HOSTS)."
+    fi
 fi
 grep -q '^CLAVE_CIFRADO=' .env || falla "backend/.env no tiene CLAVE_CIFRADO: agregala (la misma de siempre si ya hay datos cifrados)."
 mkdir -p privado media

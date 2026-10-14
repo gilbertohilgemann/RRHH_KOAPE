@@ -24,6 +24,18 @@ class AdminSoloPorHostTests(TestCase):
         self.assertNotEqual(r.status_code, 404)
 
 
+@override_settings(ALLOWED_HOSTS=[DOMINIO, '10.0.0.5', 'otro.ejemplo.test'], ADMIN_HOSTS=[DOMINIO, IP_ADMIN])
+class AdminTambienPorElDominioTests(TestCase):
+    """En el servidor, ADMIN_HOSTS lleva el dominio y la ip:puerto (pedido del cliente, 14/10/2026)."""
+
+    def test_por_el_dominio_y_por_ip_responde(self):
+        self.assertEqual(self.client.get('/admin/login/', HTTP_HOST=DOMINIO).status_code, 200)
+        self.assertEqual(self.client.get('/admin/login/', HTTP_HOST=IP_ADMIN).status_code, 200)
+
+    def test_por_otra_direccion_no_existe(self):
+        self.assertEqual(self.client.get('/admin/login/', HTTP_HOST='otro.ejemplo.test').status_code, 404)
+
+
 @override_settings(ADMIN_HOSTS=[])
 class AdminSinRestriccionTests(TestCase):
     def test_sin_admin_hosts_responde_por_cualquier_host(self):

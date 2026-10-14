@@ -202,10 +202,17 @@ server {
         proxy_read_timeout 180s;
     }
 
-    # El admin NO se publica en el dominio: solo en https://<ip>:${PUERTO_ADMIN}/admin/
-    # (archivo ${SERVICIO}-admin.conf). Django también lo rechaza (ADMIN_HOSTS).
-    location ~ ^/admin(/|\$) {
-        return 404;
+    # Admin de la plataforma también en el dominio (pedido del cliente, 14/10/2026), además de
+    # https://<ip>:${PUERTO_ADMIN}/admin/. Django solo lo atiende por las direcciones de ADMIN_HOSTS.
+    location = /admin {
+        return 301 /admin/;
+    }
+    location ^~ /admin/ {
+        proxy_pass http://127.0.0.1:${PUERTO_GUNICORN};
+        proxy_set_header Host \$host;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_read_timeout 300s;   # el backup completo puede tardar
     }
 
     # Estáticos del admin y logos (las fotos privadas NO se sirven acá).
@@ -273,7 +280,7 @@ nginx -t >/dev/null 2>&1 || falla "La configuración de nginx tiene errores: cor
 # nginx siempre arranca solo: si el sistema está detenido, muestra un aviso en vez de no responder.
 systemctl enable --now nginx >/dev/null
 systemctl reload nginx
-ok "nginx configurado: app y API en ${DOMINIO}; admin solo en https://${IP_ADMIN}:${PUERTO_ADMIN}/admin/."
+ok "nginx configurado: app, API y admin en ${DOMINIO}; admin también en https://${IP_ADMIN}:${PUERTO_ADMIN}/admin/."
 
 # ----------------------------------------------------------------------------
 paso "7/9 Firewall..."

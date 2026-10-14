@@ -2,6 +2,16 @@
 
 Qué se cambió, cuándo y por qué. Lo más reciente arriba.
 
+## 14/10/2026 — Despliegue en el VPS (Fedora) y admin también en el dominio
+
+- `deploy/fedora/` adaptado de KOAPE-PORCINO para `hhrr.koapesystem.com` (mismo VPS que PORCINO, usuario
+  `webuser`, carpeta `/home/webuser/HHRR_KOAPE`): gunicorn en 127.0.0.1:8014, admin por IP en el puerto 8006,
+  `CLAVE_CIFRADO` generada una sola vez, la app usa `/api` en el mismo dominio, backup diario y cálculo nocturno de la
+  asistencia. El servidor se preparó con SQLite (el PostgreSQL del VPS es compartido: se pasará con
+  `4-migrar-a-postgres.sh`, que no toca `pg_hba.conf`).
+- **Admin también en `https://hhrr.koapesystem.com/admin/`** (pedido del cliente), además de la ip:puerto: nginx lo
+  pasa a gunicorn y `ADMIN_HOSTS` lleva el dominio. `2-instalar-app.sh` lo suma solo a un `.env` ya existente.
+
 ## 14/10/2026 — Repositorio en GitHub y dirección de ingreso propia por empresa
 
 - **GitHub**: repositorio privado `gilbertohilgemann/RRHH_KOAPE` (rama `main`). Igual que PORCINO: se lee por HTTPS y
