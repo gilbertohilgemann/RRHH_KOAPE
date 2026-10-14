@@ -233,6 +233,8 @@ export default function Manual() {
               los datos corregidos; se paga solo la diferencia y la original queda como estaba.</li>
             <li><strong>Costo del empleador</strong>: por centro de costo, departamento, sucursal o empleado. La provisión de aguinaldo se
               muestra aparte y no suma al costo.</li>
+            <li><strong>Empleados sin IPS</strong>: en el legajo, desmarcá <em>Aporta al IPS</em>. Se liquida igual, pero sin el aporte del
+              trabajador ni el del empleador (su liquidación lo avisa) y no figura en la planilla del IPS.</li>
           </ul>
           <Aviso>Si las reglas legales o las fórmulas que usa la liquidación no están aprobadas, la liquidación es una <em>simulación</em>:
             sirve para revisar los números, pero no se puede aprobar.</Aviso>

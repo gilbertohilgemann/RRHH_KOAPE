@@ -297,8 +297,15 @@ class _Liquidador:
         self.variables['BASE_IPS'] = sum((l.importe for l in haberes if l.concepto.afecta_base_ips), CERO)
 
         # --- descuentos y aportes
+        aporta = empleado.aporta_ips
+        if not aporta:
+            self.advertencias.append('No aporta al IPS (legajo): sin aporte del trabajador ni del empleador.')
         for concepto in ctx.automaticos:
             if concepto.tipo != ConceptoNomina.HABER:
+                # Quien no aporta al IPS no lleva los aportes calculados sobre BASE_IPS (dato del concepto, no un código fijo).
+                if not aporta and concepto.base_por_defecto == 'BASE_IPS' \
+                        and concepto.tipo in (ConceptoNomina.APORTE_TRABAJADOR, ConceptoNomina.APORTE_PATRONAL):
+                    continue
                 self.por_regla(concepto)
         for linea in self.lineas:
             if linea.tipo in (ConceptoNomina.APORTE_TRABAJADOR, ConceptoNomina.APORTE_PATRONAL):

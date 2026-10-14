@@ -138,6 +138,10 @@ class Empleado(RegistroEmpresa):
     nacionalidad = models.CharField('nacionalidad', max_length=60, blank=True, default='Paraguaya')
     estado_civil = models.CharField('estado civil', max_length=12, choices=ESTADO_CIVIL_OPCIONES, blank=True)
     numero_asegurado_ips = models.CharField('número de asegurado IPS', max_length=30, blank=True)
+    aporta_ips = models.BooleanField(
+        'aporta al IPS', default=True,
+        help_text='Desmarcado: la nómina no le calcula el aporte del trabajador ni el del empleador (los conceptos con base '
+                  'BASE_IPS) y no figura en la planilla del IPS. Verificá que el caso esté contemplado por la normativa.')
     correo_personal = models.EmailField('correo personal', blank=True)
     correo_laboral = models.EmailField('correo laboral', blank=True)
     telefono = models.CharField('teléfono', max_length=50, blank=True)

@@ -64,6 +64,8 @@ Fase 0 de la especificación (`Koape_RRHH_Paquete_Tecnico/Especificacion_Tecnica
 1. **Antes de producción, verificar y aprobar** (Nómina → Reglas legales): PY-LABORAL y PY-EGRESO (preaviso,
    indemnización, causales), las reglas de cálculo de referencia y los formatos de las planillas MTESS/IPS contra los
    sistemas oficiales (REI del IPS, planillas del MTESS). Hasta entonces la nómina real queda en simulación.
+1. **Empleados sin IPS** (`Aporta al IPS` desmarcado en el legajo): confirmar en qué casos lo admite la normativa
+   (por ejemplo, jubilados o regímenes especiales) y si alguno lleva otro aporte en lugar del IPS.
 1. **Criterios del egreso a verificar**: base de la indemnización (hoy el valor del día del sueldo vigente, no un
    promedio), descuento del saldo completo de préstamos al egreso, si las vacaciones causadas cuentan para IPS.
 1. **Criterios de liquidación a verificar** (con un profesional laboral-contable): pago de feriados a jornaleros

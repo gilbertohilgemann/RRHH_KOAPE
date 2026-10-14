@@ -108,6 +108,8 @@ export const MODULOS: Modulo[] = [
       relacion('centro_costo', 'Centro de costo', 'centros-costo', { filtros: SOLO_ACTIVOS }),
       relacion('supervisor', 'Supervisor', 'empleados', { filtros: { estado: 'activo' }, sinNueva: true }),
       texto('numero_asegurado_ips', 'Número de asegurado IPS', { maxLength: 30 }),
+      siNo('aporta_ips', 'Aporta al IPS', { porDefecto: true,
+        ayuda: 'Desmarcado: se liquida igual, pero sin aporte del trabajador ni del empleador, y no va en la planilla del IPS.' }),
       largo('observaciones', 'Observaciones internas', { ayuda: 'Solo las ven Administración y RR. HH.; el empleado no.' }),
     ],
     columnas: [

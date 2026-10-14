@@ -63,6 +63,9 @@ def _ips(p):
         elif l.tipo == ConceptoNomina.APORTE_PATRONAL:
             datos['patronal'] += l.importe
     for empleado, d in por_empleado.items():
+        # Quien no aporta al IPS no va en la planilla (salvo que haya tenido aportes en el período, antes del cambio).
+        if not empleado.aporta_ips and not d['trabajador'] and not d['patronal']:
+            continue
         dias = sum(LiquidacionEmpleado.objects.filter(
             empleado=empleado, corrida__estado='cerrada', corrida__rectificada=False, corrida__tipo__in=('regular', 'rectificacion', 'liquidacion_final'),
             corrida__periodo__fecha_hasta__gte=p.periodo_desde, corrida__periodo__fecha_hasta__lte=p.periodo_hasta).values_list('dias_pagados', flat=True))

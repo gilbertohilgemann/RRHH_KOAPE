@@ -2,6 +2,14 @@
 
 Qué se cambió, cuándo y por qué. Lo más reciente arriba.
 
+## 14/10/2026 — Empleados que no aportan al IPS
+
+- Pedido del cliente: hay funcionarios sin IPS. `Empleado.aporta_ips` (por defecto sí). Si está desmarcado, la nómina
+  se procesa igual pero no calcula los aportes del trabajador ni del empleador que se calculan sobre `BASE_IPS` (se
+  decide por la base del concepto, no por un código fijo), deja el aviso "No aporta al IPS" en su liquidación (su costo
+  queda sin aporte patronal) y no figura en la planilla del IPS (sí en las del MTESS). Verificar con la normativa en
+  qué casos corresponde. Prueba nueva: 285, todas OK.
+
 ## 14/10/2026 — Historia simulada de la empresa demo y nueva pantalla de ingreso
 
 - **`manage.py simular_demo`** (después de `cargar_datos_demo`): 3 años de historia ficticia con los mismos servicios

@@ -100,6 +100,27 @@ class MotorTests(NominaMixin, TestCase):
         beto = self.liquidacion(corrida, self.beto)
         self.assertEqual((beto.neto, beto.estado_calculo), (Decimal('0'), 'advertencia'))  # jornalero sin días trabajados
 
+    def test_sin_ips_se_liquida_sin_aportes(self):
+        type(self.ana).objects.filter(pk=self.ana.pk).update(aporta_ips=False)
+        corrida = liquidar.crear(self.periodo, self.gestor1)
+        liq = self.liquidacion(corrida)
+        self.assertIsNone(linea(liq, 'IPS_TRABAJADOR'))
+        self.assertIsNone(linea(liq, 'IPS_PATRONAL'))
+        self.assertEqual((liq.bruto, liq.neto, liq.aportes_patronales, liq.costo_empleador),
+                         (Decimal('3000000'), Decimal('3000000'), Decimal('0'), Decimal('3000000')))
+        self.assertIn('No aporta al IPS', ' '.join(liq.advertencias))
+        from cumplimiento import servicios as planillas
+        from cumplimiento.models import PresentacionOficial
+        liquidar.revisar(corrida, self.gestor1)
+        liquidar.aprobar(corrida, self.admin1)
+        liquidar.cerrar(corrida, self.admin1)
+        planilla = planillas.preparar(PresentacionOficial.objects.create(
+            empresa=self.e1, tipo=PresentacionOficial.IPS_MENSUAL, periodo_desde=OCTUBRE[0], periodo_hasta=OCTUBRE[1]))
+        self.assertFalse(planilla.lineas.filter(empleado=self.ana).exists())  # no va en la planilla del IPS
+        mtess = planillas.preparar(PresentacionOficial.objects.create(
+            empresa=self.e1, tipo=PresentacionOficial.MTESS_SUELDOS, periodo_desde=date(2026, 1, 1), periodo_hasta=date(2026, 12, 31)))
+        self.assertTrue(mtess.lineas.filter(empleado=self.ana).exists())  # en la del MTESS sí
+
     def test_recalcular_no_duplica(self):
         corrida = liquidar.crear(self.periodo, self.gestor1)
         liquidar.recalcular(corrida, self.gestor1)
