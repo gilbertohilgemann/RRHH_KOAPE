@@ -44,8 +44,8 @@ React + Vite + TS + Tailwind v4 en `frontend/`). Todo en castellano.
   `github-koape-rrhh` (clave `~/.ssh/id_ed25519_koape_rrhh_push`, deploy key con escritura); el repo
   ya tiene `core.sshCommand` apuntando al OpenSSH de Windows. Commitear y subir solo cuando el cliente lo pide.
 - Puertos: backend **8004**, frontend **5204** (los demás sistemas usan 8000–8003, 8100, 5173/5174/5183/5201/5203).
-- Base local con la demo (`cargar_datos_demo`): usuarios `admin_demo`,
-  `gestor_demo`, `empleado_demo`. Cada corrida regenera la clave de la terminal
+- Base local con la demo (`cargar_datos_demo` y después `simular_demo`, 3 años de historia ficticia; la demo
+  entra por `/demo`): usuarios `admin_demo`, `gestor_demo`, `empleado_demo`. Cada corrida regenera la clave de la terminal
   demo (la imprime) y deja sin efecto la anterior.
 - **Probar desde el celular**: la PC usa la red WiFi Casa 2 (192.168.1.x; el 14/10/2026
   la IP pasó de .36 a .45 por DHCP; a veces también está en Ingenio-Gilgemann = 192.168.2.3).

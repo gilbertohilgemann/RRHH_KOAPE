@@ -2,6 +2,21 @@
 
 Qué se cambió, cuándo y por qué. Lo más reciente arriba.
 
+## 14/10/2026 — Historia simulada de la empresa demo y nueva pantalla de ingreso
+
+- **`manage.py simular_demo`** (después de `cargar_datos_demo`): 3 años de historia ficticia con los mismos servicios
+  de la aplicación. 20 empleados (10 con más de 2 años, 5 ingresados en el último año, 5 egresados con su liquidación
+  final por renuncia, despido sin causa, mutuo acuerdo, fin de contrato y despido con causa); ~20.500 marcas (QR en la
+  oficina, reloj en el depósito) con tardanzas, ausencias (la mitad justificadas), olvidos corregidos con ajustes y
+  horas extra autorizadas; aumentos cada julio; vacaciones, reposos con certificado, permisos por horas, duelo y
+  matrimonio; comisiones, bonos, viático, bonificación familiar, cuota sindical, anticipos y préstamos; nóminas de
+  octubre de 2023 a septiembre de 2026 cerradas con recibos y pagos, aguinaldos 2023–2025 y planillas IPS/MTESS
+  presentadas; y pendientes del mes en curso para mostrar las aprobaciones. La empresa demo tiene su propio conjunto
+  de reglas legales y reglas de cálculo aprobados (copias marcadas como ficticias): las globales siguen en borrador.
+  Se corre una sola vez.
+- **Ingreso con diseño de dos paneles** (pedido del cliente, con su referencia): identidad de Koape a la izquierda,
+  curva hacia el formulario, logo y nombre de la empresa a la derecha si se entra por su dirección.
+
 ## 14/10/2026 — Dominio: rrhh.koapesystem.com
 
 - El dominio es **rrhh.koapesystem.com** (RR. HH. es la abreviatura correcta en castellano; "HHRR" calca el inglés).
