@@ -16,7 +16,7 @@
 # solo por root (adentro van claves: .env, db.env, certificado).
 #
 # Uso:
-#   bash /home/webuser/RRHH_KOAPE/deploy/fedora/backup-completo.sh
+#   bash /home/webuser/HHRR_KOAPE/deploy/fedora/backup-completo.sh
 # ============================================================================
 set -euo pipefail
 # shellcheck source=comun.sh

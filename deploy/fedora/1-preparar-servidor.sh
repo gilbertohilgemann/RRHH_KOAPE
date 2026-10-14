@@ -10,7 +10,7 @@
 #   - si el sistema tiene que iniciar solo cada vez que arranca el servidor.
 #
 # Se corre desde adentro del proyecto ya clonado por el usuario de la
-# aplicación (ej. /home/webuser/RRHH_KOAPE): esa carpeta es la que se usa.
+# aplicación (ej. /home/webuser/HHRR_KOAPE): esa carpeta es la que se usa.
 #
 # Deja listo: paquetes, permisos de la carpeta del proyecto,
 # servicio systemd "koape-rrhh" (gunicorn en 127.0.0.1:PUERTO_GUNICORN),
@@ -20,14 +20,14 @@
 #
 # Uso:
 #   sudo bash 1-preparar-servidor.sh <usuario-limitado> [dominio] [ip-pública]
-#   ej.: sudo bash 1-preparar-servidor.sh koape hhrr.koapesystem.com 2.25.106.83
+#   ej.: sudo bash 1-preparar-servidor.sh koape rrhh.koapesystem.com 2.25.106.83
 # ============================================================================
 set -euo pipefail
 # shellcheck source=comun.sh
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/comun.sh"
 
 USUARIO="${1:-${SUDO_USER:-}}"
-DOMINIO="${2:-hhrr.koapesystem.com}"
+DOMINIO="${2:-rrhh.koapesystem.com}"
 IP_ADMIN="${3:-2.25.106.83}"
 
 [ "$(id -u)" -eq 0 ] || falla "Este script se corre como root: sudo bash $0 <usuario-limitado> [dominio] [ip-pública]"

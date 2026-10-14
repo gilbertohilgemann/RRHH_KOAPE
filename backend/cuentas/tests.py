@@ -65,7 +65,7 @@ class IngresoTests(EscenarioMixin, TestCase):
 
 
 class DireccionAccesoTests(EscenarioMixin, TestCase):
-    """Ingreso propio de cada empresa: hhrr.koapesystem.com/<dirección>."""
+    """Ingreso propio de cada empresa: rrhh.koapesystem.com/<dirección>."""
 
     def setUp(self):
         from django.core.cache import cache

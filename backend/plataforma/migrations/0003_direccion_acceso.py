@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='empresa',
             name='direccion_acceso',
-            field=models.CharField(blank=True, help_text='La parte final de la dirección de ingreso propia de la empresa: hhrr.koapesystem.com/<dirección>. Ahí el ingreso muestra su logo y sus colores, y solo entran sus usuarios. Vacía = sin dirección propia.', max_length=40, null=True, unique=True, validators=[django.core.validators.RegexValidator('^[a-z0-9]+(-[a-z0-9]+)*$', 'Solo minúsculas sin acentos, números y guiones (ej. delacosta o de-la-costa).')], verbose_name='dirección de acceso'),
+            field=models.CharField(blank=True, help_text='La parte final de la dirección de ingreso propia de la empresa: rrhh.koapesystem.com/<dirección>. Ahí el ingreso muestra su logo y sus colores, y solo entran sus usuarios. Vacía = sin dirección propia.', max_length=40, null=True, unique=True, validators=[django.core.validators.RegexValidator('^[a-z0-9]+(-[a-z0-9]+)*$', 'Solo minúsculas sin acentos, números y guiones (ej. delacosta o de-la-costa).')], verbose_name='dirección de acceso'),
         ),
     ]

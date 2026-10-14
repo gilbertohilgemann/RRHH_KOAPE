@@ -2,14 +2,20 @@
 
 Qué se cambió, cuándo y por qué. Lo más reciente arriba.
 
+## 14/10/2026 — Dominio: rrhh.koapesystem.com
+
+- El dominio es **rrhh.koapesystem.com** (RR. HH. es la abreviatura correcta en castellano; "HHRR" calca el inglés).
+  Se reemplazó en los scripts, la documentación, los manuales y la ayuda de la dirección de acceso. La carpeta del
+  servidor sigue siendo `/home/webuser/HHRR_KOAPE` (los scripts la detectan solos).
+
 ## 14/10/2026 — Despliegue en el VPS (Fedora) y admin también en el dominio
 
-- `deploy/fedora/` adaptado de KOAPE-PORCINO para `hhrr.koapesystem.com` (mismo VPS que PORCINO, usuario
+- `deploy/fedora/` adaptado de KOAPE-PORCINO para `rrhh.koapesystem.com` (mismo VPS que PORCINO, usuario
   `webuser`, carpeta `/home/webuser/HHRR_KOAPE`): gunicorn en 127.0.0.1:8014, admin por IP en el puerto 8006,
   `CLAVE_CIFRADO` generada una sola vez, la app usa `/api` en el mismo dominio, backup diario y cálculo nocturno de la
   asistencia. El servidor se preparó con SQLite (el PostgreSQL del VPS es compartido: se pasará con
   `4-migrar-a-postgres.sh`, que no toca `pg_hba.conf`).
-- **Admin también en `https://hhrr.koapesystem.com/admin/`** (pedido del cliente), además de la ip:puerto: nginx lo
+- **Admin también en `https://rrhh.koapesystem.com/admin/`** (pedido del cliente), además de la ip:puerto: nginx lo
   pasa a gunicorn y `ADMIN_HOSTS` lleva el dominio. `2-instalar-app.sh` lo suma solo a un `.env` ya existente.
 
 ## 14/10/2026 — Repositorio en GitHub y dirección de ingreso propia por empresa
@@ -20,7 +26,7 @@ Qué se cambió, cuándo y por qué. Lo más reciente arriba.
   y `node_modules`. La contraseña inicial fija del superusuario (convención de PORCINO) está en el código: el
   repositorio tiene que seguir siendo privado y en el servidor se cambia al entrar.
 - **Dirección de ingreso por empresa** (pedido del cliente): `Empresa.direccion_acceso` (única, minúsculas, números y
-  guiones; no puede ser una palabra que usa el sistema: admin, api, ingresar, terminal…). `hhrr.koapesystem.com/<dirección>`
+  guiones; no puede ser una palabra que usa el sistema: admin, api, ingresar, terminal…). `rrhh.koapesystem.com/<dirección>`
   muestra el logo, el nombre y los colores de esa empresa (`GET /api/acceso/<dirección>/`, público, solo nombre y
   marca, con límite de pedidos) y por ahí solo entran sus usuarios (y la plataforma); si no corresponde, el mismo
   mensaje que una contraseña errónea, y queda en la auditoría. Sin dirección (o con una inexistente), el ingreso

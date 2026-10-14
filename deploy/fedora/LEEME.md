@@ -1,15 +1,15 @@
-# Instalación en Fedora Cloud — hhrr.koapesystem.com
+# Instalación en Fedora Cloud — rrhh.koapesystem.com
 
 Adaptado de los scripts de KOAPE-PORCINO (mismo esquema). La IP `2.25.106.83` de los ejemplos es la del
 VPS de PORCINO: si Koape RR. HH. va en otro servidor, usá la suya.
 
 nginx sirve la aplicación en el dominio y pasa `/api/` a gunicorn (puerto
 interno **8014**), con HTTPS de Let's Encrypt. Cada empresa entra por su dirección propia
-(`hhrr.koapesystem.com/delacosta`): nginx manda esas rutas a la aplicación, que muestra su ingreso personalizado. La aplicación corre con un
+(`rrhh.koapesystem.com/delacosta`): nginx manda esas rutas a la aplicación, que muestra su ingreso personalizado. La aplicación corre con un
 **usuario limitado**; root solo se usa para preparar el servidor, sacar el
 certificado y pasar a PostgreSQL.
 
-**El admin** se entra por **`https://hhrr.koapesystem.com/admin/`** (pedido del cliente, 14/10/2026) y
+**El admin** se entra por **`https://rrhh.koapesystem.com/admin/`** (pedido del cliente, 14/10/2026) y
 también por **`https://2.25.106.83:8006/admin/`**, con un certificado propio (el navegador avisa la primera
 vez y se acepta; si se entra con `http://`, se pasa solo a `https://`). Django solo lo atiende por las
 direcciones de `ADMIN_HOSTS` en `backend/.env` (el dominio y la ip:puerto). Al preparar el servidor se puede
@@ -45,10 +45,10 @@ solo cada vez que arranca el servidor. Se puede cambiar cuando se quiera:
 
 ## Antes de empezar
 
-- El subdominio `hhrr.koapesystem.com` tiene que apuntar (registro A) a la IP del servidor.
+- El subdominio `rrhh.koapesystem.com` tiene que apuntar (registro A) a la IP del servidor.
 - El proveedor de la nube tiene que permitir los puertos **80**, **443** y **8006** (admin), además del 22 para SSH.
 - Los puertos **8014** (interno) y **8006** no tienen que estar usados por otro programa: el script lo revisa y, si lo están, se frena sin tocar nada.
-- La aplicación es del usuario **`webuser`** y vive en **`/home/webuser/RRHH_KOAPE`**. Los
+- La aplicación es del usuario **`webuser`** y vive en **`/home/webuser/HHRR_KOAPE`**. Los
   scripts toman la carpeta sola (donde esté clonado el proyecto) y se corren desde root
   (los de root) o con `sudo -iu webuser` (los del usuario).
 - Al estar dentro de `/home`, el script 1 deja que nginx **atraviese** `/home/webuser`
@@ -73,13 +73,13 @@ Esa clave pública se carga en GitHub → repositorio → *Settings → Deploy k
 
 ```bash
 sudo -iu webuser bash -c 'printf "\nHost github-rrhh\n    HostName github.com\n    User git\n    IdentityFile ~/.ssh/koape_rrhh\n    IdentitiesOnly yes\n" >> ~/.ssh/config && chmod 600 ~/.ssh/config'
-sudo -iu webuser bash -c 'cd ~ && git clone git@github-rrhh:gilbertohilgemann/RRHH_KOAPE.git'
+sudo -iu webuser bash -c 'cd ~ && git clone git@github-rrhh:gilbertohilgemann/RRHH_KOAPE.git ~/HHRR_KOAPE'
 ```
 
 ### 2. Preparar el servidor (root)
 
 ```bash
-bash /home/webuser/RRHH_KOAPE/deploy/fedora/1-preparar-servidor.sh webuser hhrr.koapesystem.com 2.25.106.83
+bash /home/webuser/HHRR_KOAPE/deploy/fedora/1-preparar-servidor.sh webuser rrhh.koapesystem.com 2.25.106.83
 ```
 
 Pregunta tres cosas: la base de datos (`1` SQLite / `2` PostgreSQL), si el sistema
@@ -89,21 +89,21 @@ admin (Enter = desde cualquiera).
 ### 3. Instalar la aplicación (como webuser)
 
 ```bash
-sudo -iu webuser bash -c 'cd ~/RRHH_KOAPE && bash deploy/fedora/2-instalar-app.sh'
+sudo -iu webuser bash -c 'cd ~/HHRR_KOAPE && bash deploy/fedora/2-instalar-app.sh'
 ```
 
-Al terminar, la app ya responde en `http://hhrr.koapesystem.com`.
+Al terminar, la app ya responde en `http://rrhh.koapesystem.com`.
 
 ### 4. Certificado HTTPS (root)
 
 ```bash
-bash /home/webuser/RRHH_KOAPE/deploy/fedora/3-certificado.sh correo@ejemplo.com
+bash /home/webuser/HHRR_KOAPE/deploy/fedora/3-certificado.sh correo@ejemplo.com
 ```
 
 ### (Más adelante) Pasar de SQLite a PostgreSQL (root)
 
 ```bash
-bash /home/webuser/RRHH_KOAPE/deploy/fedora/4-migrar-a-postgres.sh
+bash /home/webuser/HHRR_KOAPE/deploy/fedora/4-migrar-a-postgres.sh
 ```
 
 Requiere un PostgreSQL ya funcionando en el servidor (en este VPS, el compartido con las otras aplicaciones).
@@ -118,7 +118,7 @@ SQLite queda como `backend/db.sqlite3.antes-de-postgres`; al final muestra cómo
 ### Backup completo (root, cuando se quiera)
 
 ```bash
-bash /home/webuser/RRHH_KOAPE/deploy/fedora/backup-completo.sh
+bash /home/webuser/HHRR_KOAPE/deploy/fedora/backup-completo.sh
 ```
 
 Un solo `.tar.gz` (solo para root) con el proyecto (sin `venv`, `node_modules`, `dist` ni `.git`), la base
@@ -127,7 +127,7 @@ Un solo `.tar.gz` (solo para root) con el proyecto (sin `venv`, `node_modules`, 
 
 ### 5. Primer ingreso
 
-Entrá a `https://hhrr.koapesystem.com/admin/` (o `https://2.25.106.83:8006/admin/`) con el usuario `admin` y
+Entrá a `https://rrhh.koapesystem.com/admin/` (o `https://2.25.106.83:8006/admin/`) con el usuario `admin` y
 **cambiá la contraseña**.
 El manual del administrador está en el menú del admin; el de cada perfil, en el botón *Manual* de la aplicación.
 Después, en *Empresas*, cargá cada empresa con su **Dirección de acceso** (ej. `delacosta`).
@@ -136,7 +136,7 @@ Después, en *Empresas*, cargá cada empresa con su **Dirección de acceso** (ej
 
 | Para | Comando (como root; o como webuser, con `sudo`) |
 |---|---|
-| Actualizar a la última versión | `sudo -iu webuser bash -c 'cd ~/RRHH_KOAPE && bash deploy/fedora/actualizar.sh'` |
+| Actualizar a la última versión | `sudo -iu webuser bash -c 'cd ~/HHRR_KOAPE && bash deploy/fedora/actualizar.sh'` |
 | Reiniciar | `sudo systemctl restart koape-rrhh` |
 | Detener / iniciar | `sudo systemctl stop koape-rrhh` / `sudo systemctl start koape-rrhh` |
 | Activar / quitar el inicio automático | `sudo systemctl enable koape-rrhh` / `sudo systemctl disable koape-rrhh` |
@@ -153,8 +153,8 @@ Con **SQLite** (`base_….sqlite3`):
 
 ```bash
 sudo systemctl stop koape-rrhh
-cp /var/backups/koape-rrhh/base_AAAA-MM-DD_HHMM.sqlite3 /home/webuser/RRHH_KOAPE/backend/db.sqlite3
-tar -xzf /var/backups/koape-rrhh/archivos_AAAA-MM-DD_HHMM.tar.gz -C /home/webuser/RRHH_KOAPE/backend
+cp /var/backups/koape-rrhh/base_AAAA-MM-DD_HHMM.sqlite3 /home/webuser/HHRR_KOAPE/backend/db.sqlite3
+tar -xzf /var/backups/koape-rrhh/archivos_AAAA-MM-DD_HHMM.tar.gz -C /home/webuser/HHRR_KOAPE/backend
 sudo systemctl start koape-rrhh
 ```
 
@@ -163,6 +163,6 @@ Con **PostgreSQL** (`base_….dump`):
 ```bash
 source /etc/koape-rrhh/db.env
 PGPASSWORD="$DB_PASSWORD" pg_restore -h 127.0.0.1 -U "$DB_USER" -d "$DB_NAME" --clean --if-exists /var/backups/koape-rrhh/base_AAAA-MM-DD_HHMM.dump
-tar -xzf /var/backups/koape-rrhh/archivos_AAAA-MM-DD_HHMM.tar.gz -C /home/webuser/RRHH_KOAPE/backend
+tar -xzf /var/backups/koape-rrhh/archivos_AAAA-MM-DD_HHMM.tar.gz -C /home/webuser/HHRR_KOAPE/backend
 sudo systemctl restart koape-rrhh
 ```

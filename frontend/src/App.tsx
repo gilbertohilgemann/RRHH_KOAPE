@@ -67,7 +67,7 @@ export default function App() {
             <Route path="/m/:clave/nuevo" element={<Formulario />} />
             <Route path="/m/:clave/:id" element={<Formulario />} />
           </Route>
-          {/* Ingreso propio de cada empresa: hhrr.koapesystem.com/<dirección> (las rutas fijas de arriba tienen prioridad). */}
+          {/* Ingreso propio de cada empresa: rrhh.koapesystem.com/<dirección> (las rutas fijas de arriba tienen prioridad). */}
           <Route path="/:direccion" element={<Ingreso />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

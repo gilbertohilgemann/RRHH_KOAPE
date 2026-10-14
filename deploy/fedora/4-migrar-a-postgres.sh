@@ -21,7 +21,7 @@
 # Si algo falla antes del paso 5, el sistema sigue con SQLite, sin cambios.
 #
 # Uso:
-#   bash /home/webuser/RRHH_KOAPE/deploy/fedora/4-migrar-a-postgres.sh
+#   bash /home/webuser/HHRR_KOAPE/deploy/fedora/4-migrar-a-postgres.sh
 # ============================================================================
 set -euo pipefail
 # shellcheck source=comun.sh

@@ -8,7 +8,7 @@
 # Antes de migrar hace un backup de la base (por las dudas).
 #
 # Uso:
-#   cd /home/webuser/RRHH_KOAPE && bash deploy/fedora/actualizar.sh
+#   cd /home/webuser/HHRR_KOAPE && bash deploy/fedora/actualizar.sh
 # ============================================================================
 set -euo pipefail
 

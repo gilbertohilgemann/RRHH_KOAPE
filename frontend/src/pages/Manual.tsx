@@ -37,7 +37,7 @@ export default function Manual() {
         <p>Entrá con el usuario y la contraseña que te dio el administrador de tu empresa. Para cerrar la sesión usá
           <strong> Salir</strong>, arriba a la derecha: se cierra en todos los dispositivos donde la tenías abierta.</p>
         <p>Tu empresa puede tener su <strong>dirección de ingreso propia</strong>, con su logo y sus colores (por ejemplo
-          <code> hhrr.koapesystem.com/delacosta</code>): guardala en favoritos. Por esa dirección solo entran los usuarios de tu empresa;
+          <code> rrhh.koapesystem.com/delacosta</code>): guardala en favoritos. Por esa dirección solo entran los usuarios de tu empresa;
           al salir, volvés a ella.{usuario?.empresa?.direccion_acceso ? ` La de tu empresa es /${usuario.empresa.direccion_acceso}.` : ''}</p>
         <p>El menú de la izquierda agrupa las pantallas por tema (Personal, Jornada, Asistencia, Licencias, Nómina, Reportes,
           Estructura, Administración): tocá el nombre del grupo para desplegar o cerrar

@@ -5,7 +5,7 @@
 # ============================================================================
 
 # La carpeta del proyecto se calcula sola (donde se clonó el repositorio, ej.
-# /home/webuser/RRHH_KOAPE): nunca una ruta escrita a mano.
+# /home/webuser/HHRR_KOAPE): nunca una ruta escrita a mano.
 DIR_APP="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 DIR_CONF="/etc/koape-rrhh"
 DIR_BACKUP="/var/backups/koape-rrhh"

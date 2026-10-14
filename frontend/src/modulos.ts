@@ -1337,7 +1337,7 @@ export const MODULOS: Modulo[] = [
     campos: [
       texto('nombre', 'Nombre comercial', { requerido: true, maxLength: 150, seccion: 'Empresa' }),
       texto('direccion_acceso', 'Dirección de acceso', { soloLectura: true,
-        ayuda: 'Ingreso propio con su logo y colores: hhrr.koapesystem.com/<dirección>. La asigna Koape.' }),
+        ayuda: 'Ingreso propio con su logo y colores: rrhh.koapesystem.com/<dirección>. La asigna Koape.' }),
       texto('razon_social', 'Razón social', { maxLength: 200 }),
       texto('ruc', 'RUC', { maxLength: 30 }),
       texto('actividad', 'Actividad económica', { maxLength: 150 }),

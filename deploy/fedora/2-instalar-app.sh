@@ -3,7 +3,7 @@
 # Koape RR. HH. — 2. Instalar la aplicación
 #
 # Se corre con el USUARIO LIMITADO (no root), dentro de la carpeta del
-# proyecto (ej. /home/webuser/RRHH_KOAPE), después de 1-preparar-servidor.sh:
+# proyecto (ej. /home/webuser/HHRR_KOAPE), después de 1-preparar-servidor.sh:
 #
 #   - entorno virtual de Python y dependencias;
 #   - backend/.env de producción (la base elegida al preparar el servidor:
@@ -16,7 +16,7 @@
 # Se puede volver a correr sin problema (no pisa un .env ya armado).
 #
 # Uso:
-#   cd /home/webuser/RRHH_KOAPE && bash deploy/fedora/2-instalar-app.sh
+#   cd /home/webuser/HHRR_KOAPE && bash deploy/fedora/2-instalar-app.sh
 # ============================================================================
 set -euo pipefail
 

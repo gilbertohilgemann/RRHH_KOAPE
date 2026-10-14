@@ -42,7 +42,7 @@ class Empresa(RegistroBase):
     nombre = models.CharField('nombre comercial', max_length=150, unique=True)
     direccion_acceso = models.CharField(
         'dirección de acceso', max_length=40, unique=True, null=True, blank=True, validators=[validar_direccion],
-        help_text='La parte final de la dirección de ingreso propia de la empresa: hhrr.koapesystem.com/<dirección>. '
+        help_text='La parte final de la dirección de ingreso propia de la empresa: rrhh.koapesystem.com/<dirección>. '
                   'Ahí el ingreso muestra su logo y sus colores, y solo entran sus usuarios. Vacía = sin dirección propia.')
     razon_social = models.CharField('razón social', max_length=200, blank=True)
     ruc = models.CharField('RUC', max_length=30, blank=True)

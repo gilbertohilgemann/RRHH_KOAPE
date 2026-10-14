@@ -31,7 +31,7 @@ export function guardarToken(token: string | null) {
   }
 }
 
-// Dirección de acceso de la empresa por la que se entró (hhrr.koapesystem.com/<dirección>):
+// Dirección de acceso de la empresa por la que se entró (rrhh.koapesystem.com/<dirección>):
 // al salir o al vencer la sesión se vuelve a ese mismo ingreso personalizado.
 const CLAVE_ACCESO = 'koape_rrhh_acceso'
 

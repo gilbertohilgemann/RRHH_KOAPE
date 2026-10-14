@@ -290,7 +290,7 @@ Casi todos heredan de `core.models.RegistroBase` (auditoría: `creado_por`,
   CORRESPONDE_PREAVISO, CORRESPONDE_INDEMNIZACION y SALDO_VACACIONES, calculadas con los parámetros de PY-EGRESO.
 - **Reportes y exportaciones**: un reporte nuevo se agrega con el decorador `@reporte(...)` en `core/reportes.py`
   (permiso, filtros, columnas; filtrar siempre con `alcance.filtrar`). Toda exportación pasa por `core/exportar.py`.
-- **Dirección de ingreso por empresa**: `Empresa.direccion_acceso` → `hhrr.koapesystem.com/<dirección>` (ruta
+- **Dirección de ingreso por empresa**: `Empresa.direccion_acceso` → `rrhh.koapesystem.com/<dirección>` (ruta
   `/:direccion` del frontend, la última antes del comodín: las rutas fijas tienen prioridad). `GET /api/acceso/<dirección>/`
   da nombre y marca sin sesión; `POST /api/sesion/ingresar/` con `empresa` solo acepta usuarios de esa empresa (o la
   plataforma). Las palabras reservadas están en `plataforma.models.DIRECCIONES_RESERVADAS`: si se agrega una ruta de
