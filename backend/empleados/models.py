@@ -138,6 +138,10 @@ class Empleado(RegistroEmpresa):
     nacionalidad = models.CharField('nacionalidad', max_length=60, blank=True, default='Paraguaya')
     estado_civil = models.CharField('estado civil', max_length=12, choices=ESTADO_CIVIL_OPCIONES, blank=True)
     numero_asegurado_ips = models.CharField('número de asegurado IPS', max_length=30, blank=True)
+    sin_control_asistencia = models.BooleanField(
+        'sin control de asistencia', default=False,
+        help_text='Marcado: no se le calcula la asistencia (ni ausencias ni tardanzas) y la nómina le paga siempre el valor '
+                  'completo del período; descuentos o bonificaciones, solo cargados a mano como novedades.')
     aporta_ips = models.BooleanField(
         'aporta al IPS', default=True,
         help_text='Desmarcado: la nómina no le calcula el aporte del trabajador ni el del empleador (los conceptos con base '

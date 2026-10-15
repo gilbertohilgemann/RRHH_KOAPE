@@ -21,7 +21,8 @@ from core import alcance, auditoria
 from core.api.base import RegistroSerializer, RegistroViewSet, a_error_drf
 from core.models import EventoAuditoria
 from novedades import servicios
-from novedades.models import Anticipo, CuotaRecuperacion, DescuentoAutorizado, Novedad, Prestamo, saldo_de
+from novedades.models import (Anticipo, CuotaRecuperacion, DescuentoAutorizado, Novedad, Prestamo, ReciboAnticipo, recibo_vigente,
+                              saldo_de)
 
 
 def _motivo(request):
@@ -152,7 +153,7 @@ class AnticipoViewSet(_ConAcciones):
     campo_fecha = 'fecha'
     permisos_acciones = {'aprobar': 'novedades.aprobar_anticipo', 'rechazar': 'novedades.aprobar_anticipo',
                          'anular': 'novedades.aprobar_anticipo', 'pagar': 'novedades.pagar_anticipo',
-                         'cancelar_saldo': 'novedades.pagar_anticipo'}
+                         'cancelar_saldo': 'novedades.pagar_anticipo', 'comprobante': 'novedades.view_reciboanticipo'}
 
     def perform_create(self, serializer):
         # El perfil Empleado pide solo para sí (queda solicitado).
@@ -200,6 +201,70 @@ class AnticipoViewSet(_ConAcciones):
         motivo = _motivo(request)
         return self._ejecutar(request, lambda a: servicios.cancelar_saldo(a, request.user, motivo),
                               lambda r: f'Saldo del anticipo pagado aparte ({r[1]:,.0f}): {motivo}'.replace(',', '.'))
+
+    @action(detail=True, methods=['post'])
+    def comprobante(self, request, pk=None):
+        """El comprobante vigente del pago (para ir a verlo e imprimirlo). Si falta y el usuario puede registrar pagos, lo emite."""
+        anticipo = self.get_object()
+        recibo = recibo_vigente(anticipo)
+        if recibo is None:
+            if not alcance.tiene_permiso(request.user, 'novedades.pagar_anticipo'):
+                return Response({'detail': 'Este anticipo todavía no tiene comprobante.'}, status=404)
+            try:
+                recibo = servicios.emitir_recibo_anticipo(anticipo, request.user)
+            except ValidationErrorDjango as e:
+                raise a_error_drf(e)
+            auditoria.registrar(request.user, EventoAuditoria.ALTA, recibo, request=request, descripcion='Comprobante de anticipo emitido.')
+        return Response(ReciboAnticipoSerializer(recibo, context=self.get_serializer_context()).data)
+
+
+class ReciboAnticipoSerializer(RegistroSerializer):
+    class Meta:
+        model = ReciboAnticipo
+        fields = '__all__'
+
+
+class ReciboAnticipoViewSet(RegistroViewSet):
+    """Comprobantes de anticipo: consulta e impresión; `anular` (con motivo) no deshace el pago."""
+
+    serializer_class = ReciboAnticipoSerializer
+    search_fields = ['numero', 'empleado__codigo', 'empleado__primer_apellido']
+    filtros_exactos = ('empleado', 'anticipo', 'estado')
+    campo_fecha = 'fecha_emision'
+    permite_borrar = False
+    http_method_names = ['get', 'post', 'head', 'options']
+    permisos_acciones = {'anular': 'novedades.pagar_anticipo'}
+
+    def create(self, request, *args, **kwargs):
+        return Response({'detail': 'El comprobante se emite al registrar el pago del anticipo.'}, status=405)
+
+    def retrieve(self, request, *args, **kwargs):
+        """Todo lo que lleva el comprobante impreso: empresa, empleado, pago y plan de descuento."""
+        recibo = self.get_object()
+        datos = self.get_serializer(recibo).data
+        empresa, empleado, anticipo = recibo.empresa, recibo.empleado, recibo.anticipo
+        datos['empresa'] = {'nombre': empresa.nombre, 'razon_social': empresa.razon_social, 'ruc': empresa.ruc,
+                            'direccion': empresa.direccion}
+        if recibo.aporta_ips:  # sin IPS, el comprobante no lleva el número patronal
+            datos['empresa']['numero_patronal_ips'] = empresa.numero_patronal_ips
+        datos['empleado_datos'] = {'codigo': empleado.codigo, 'nombre': str(empleado), 'documento': empleado.numero_documento,
+                                   'puesto': str(empleado.puesto) if empleado.puesto_id else ''}
+        datos['anticipo_datos'] = {'fecha': anticipo.fecha, 'motivo': anticipo.motivo, 'monto_solicitado': anticipo.monto_solicitado,
+                                   'cuotas': anticipo.cuotas, 'saldo': saldo_de(anticipo)}
+        datos['cuotas'] = [{'numero': c.numero, 'mes': c.mes, 'monto': c.monto, 'estado': c.get_estado_display()}
+                           for c in anticipo.cuotas_recuperacion.order_by('numero')]
+        return Response(datos)
+
+    @action(detail=True, methods=['post'])
+    def anular(self, request, pk=None):
+        motivo = _motivo(request)
+        recibo = self.get_object()
+        try:
+            servicios.anular_recibo_anticipo(recibo, request.user, motivo)
+        except ValidationErrorDjango as e:
+            raise a_error_drf(e)
+        auditoria.registrar(request.user, EventoAuditoria.ACCION, recibo, request=request, descripcion=f'Comprobante anulado: {motivo}')
+        return Response(self.get_serializer(recibo).data)
 
 
 class PrestamoSerializer(_ConSaldo):

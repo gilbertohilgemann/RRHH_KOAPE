@@ -108,6 +108,10 @@ export const MODULOS: Modulo[] = [
       relacion('centro_costo', 'Centro de costo', 'centros-costo', { filtros: SOLO_ACTIVOS }),
       relacion('supervisor', 'Supervisor', 'empleados', { filtros: { estado: 'activo' }, sinNueva: true }),
       texto('numero_asegurado_ips', 'Número de asegurado IPS', { maxLength: 30 }),
+      texto('tipo_sueldo', 'Tipo de sueldo', { soloLectura: true,
+        ayuda: 'El del sueldo vigente (hora, día, semana, quincena o mes). Se cambia en Contratos e Historial salarial.' }),
+      siNo('sin_control_asistencia', 'Sin control de asistencia', {
+        ayuda: 'Marcado: no se controla su asistencia y se le paga siempre el valor completo; descuentos o bonos, solo como novedades.' }),
       siNo('aporta_ips', 'Aporta al IPS', { porDefecto: true,
         ayuda: 'Desmarcado: se liquida igual, pero sin aporte del trabajador ni del empleador, y no va en la planilla del IPS.' }),
       largo('observaciones', 'Observaciones internas', { ayuda: 'Solo las ven Administración y RR. HH.; el empleado no.' }),
@@ -952,6 +956,8 @@ export const MODULOS: Modulo[] = [
         visibleSi: (r) => r.estado === 'solicitado' || r.estado === 'aprobado', pideMotivo: true },
       { accion: 'cancelar_saldo', etiqueta: 'El saldo se pagó aparte', permiso: 'novedades.pagar_anticipo', peligrosa: true,
         visibleSi: (r) => r.estado === 'pagado', pideMotivo: true },
+      { accion: 'comprobante', etiqueta: 'Ver e imprimir el comprobante', permiso: 'novedades.view_reciboanticipo',
+        visibleSi: (r) => r.estado === 'pagado' || r.estado === 'recuperado', irA: (c) => `/anticipos/comprobante/${c.id}` },
     ],
   },
   {

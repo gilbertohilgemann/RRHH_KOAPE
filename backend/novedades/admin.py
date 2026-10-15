@@ -1,7 +1,15 @@
 from django.contrib import admin
 
 from core.admin_base import SoloLecturaAdmin
-from novedades.models import Anticipo, CuotaRecuperacion, DescuentoAutorizado, Novedad, Prestamo
+from novedades.models import Anticipo, CuotaRecuperacion, DescuentoAutorizado, Novedad, Prestamo, ReciboAnticipo
+
+
+@admin.register(ReciboAnticipo)
+class ReciboAnticipoAdmin(SoloLecturaAdmin):
+    """Se emiten al registrar el pago del anticipo (en la aplicación)."""
+    list_display = ('numero', 'empleado', 'fecha_emision', 'monto', 'estado', 'empresa')
+    list_filter = ('estado', 'empresa')
+    search_fields = ('numero', 'empleado__codigo', 'empleado__primer_apellido')
 
 
 @admin.register(Novedad)

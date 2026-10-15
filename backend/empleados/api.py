@@ -200,6 +200,8 @@ class EmpleadoSerializer(RegistroSerializer):
     nombre_completo = serializers.CharField(read_only=True)
     # La foto es privada: no se expone su ruta, se pide a `<id>/foto/`.
     tiene_foto = serializers.SerializerMethodField()
+    # Tipo de sueldo (hora, día, semana, quincena, mes…) del sueldo vigente: se cambia en Contratos / Historial salarial.
+    tipo_sueldo = serializers.SerializerMethodField()
 
     class Meta:
         model = Empleado
@@ -207,6 +209,13 @@ class EmpleadoSerializer(RegistroSerializer):
 
     def get_tiene_foto(self, empleado):
         return bool(empleado.foto)
+
+    def get_tipo_sueldo(self, empleado):
+        from contratos.models import sueldo_vigente
+        if not empleado.pk:
+            return ''
+        sueldo = sueldo_vigente(empleado, empleado.fecha_egreso or None)
+        return sueldo.esquema_salarial.get_base_calculo_display() if sueldo else 'Sin sueldo vigente'
 
 
 class FichaPropiaSerializer(EmpleadoSerializer):

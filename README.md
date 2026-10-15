@@ -284,7 +284,10 @@ Casi todos heredan de `core.models.RegistroBase` (auditoría: `creado_por`,
   importación y licencias); una cerrada solo se rectifica con otra corrida enlazada. El aporte del empleador nunca
   resta del neto y no se muestra en el recibo del trabajador ni a quien no tiene `nomina.ver_costo_patronal`.
   Un empleado con `aporta_ips=False` no lleva los aportes automáticos cuya `base_por_defecto` es `BASE_IPS` y no va
-  en la planilla del IPS.
+  en la planilla del IPS (ni su recibo lleva el número patronal: `LiquidacionEmpleado.aporta_ips` guarda el dato al
+  calcular). Con `sin_control_asistencia=True` la asistencia no se calcula y la nómina paga el valor completo
+  (`_Liquidador._programado` para jornal y hora). Los anticipos pagados tienen su `ReciboAnticipo` numerado, que la
+  línea de cada cuota cita en la nómina.
 - **Aguinaldo y egreso**: corridas de tipo `aguinaldo` y `liquidacion_final` (períodos `especial`, que no cierran la
   asistencia). El aguinaldo suma las líneas de haberes con `afecta_base_aguinaldo` de las corridas cerradas no
   rectificadas del año y resta lo ya pagado (conceptos con `aplicacion='aguinaldo'`). La liquidación final usa los

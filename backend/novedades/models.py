@@ -373,3 +373,43 @@ def saldo_de(objeto):
     """Lo que falta recuperar de un anticipo o un préstamo: sus cuotas pendientes."""
     return objeto.cuotas_recuperacion.filter(estado=CuotaRecuperacion.PENDIENTE).aggregate(
         t=models.Sum('monto'))['t'] or Decimal('0')
+
+
+class ReciboAnticipo(RegistroEmpresa):
+    """Comprobante del pago de un anticipo, numerado (A<año>-000001), para imprimir y firmar al entregarlo.
+    Las cuotas que lo descuentan en la nómina citan su número y su fecha."""
+
+    EMITIDO = 'emitido'
+    ANULADO = 'anulado'
+    ESTADO_OPCIONES = [(EMITIDO, 'Emitido'), (ANULADO, 'Anulado')]
+
+    anticipo = models.ForeignKey(Anticipo, on_delete=models.PROTECT, related_name='recibos', verbose_name='anticipo')
+    empleado = models.ForeignKey('empleados.Empleado', on_delete=models.PROTECT, related_name='recibos_anticipo',
+                                 verbose_name='empleado')
+    numero = models.CharField('número', max_length=30)
+    fecha_emision = models.DateField('fecha')
+    monto = models.DecimalField('monto entregado', max_digits=14, decimal_places=2)
+    moneda = models.CharField('moneda', max_length=3, default='PYG')
+    forma_pago = models.CharField('forma de pago', max_length=15, blank=True)
+    referencia_pago = models.CharField('referencia del pago', max_length=100, blank=True)
+    aporta_ips = models.BooleanField('aportaba al IPS', default=True,
+                                     help_text='Copia del legajo al emitir: sin IPS, el comprobante no lleva el número patronal.')
+    estado = models.CharField('estado', max_length=10, choices=ESTADO_OPCIONES, default=EMITIDO, editable=False)
+    motivo_anulacion = models.CharField('motivo de anulación', max_length=250, blank=True, editable=False)
+
+    ruta_sucursal = 'empleado__sucursal'
+    ruta_empleado = 'empleado'
+
+    class Meta:
+        verbose_name = 'comprobante de anticipo'
+        verbose_name_plural = 'comprobantes de anticipo'
+        ordering = ['-fecha_emision', '-numero']
+        constraints = [models.UniqueConstraint(fields=['empresa', 'numero'], name='recibo_anticipo_numero_unico')]
+
+    def __str__(self):
+        return f'{self.numero} del {self.fecha_emision:%d/%m/%Y}'
+
+
+def recibo_vigente(anticipo):
+    """El comprobante emitido (no anulado) del anticipo, o None."""
+    return anticipo.recibos.filter(estado=ReciboAnticipo.EMITIDO).order_by('-fecha_emision', '-id').first()

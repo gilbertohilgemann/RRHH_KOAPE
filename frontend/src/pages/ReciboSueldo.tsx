@@ -52,7 +52,11 @@ export default function ReciboSueldo() {
             <img src={logoDe(usuario)} alt="" className="h-12 w-auto object-contain" />
             <div>
               <p className="text-base font-bold">{empresa.razon_social || empresa.nombre}</p>
-              <p className="text-xs text-stone-600">RUC {empresa.ruc || '—'} · N.º patronal IPS {empresa.numero_patronal_ips || '—'}</p>
+              <p className="text-xs text-stone-600">
+                RUC {empresa.ruc || '—'}
+                {/* Solo si el empleado aportaba al IPS: si no, el recibo no lleva el número patronal (lo decide el servidor). */}
+                {'numero_patronal_ips' in empresa && ` · N.º patronal IPS ${empresa.numero_patronal_ips || '—'}`}
+              </p>
               <p className="text-xs text-stone-600">{empresa.direccion}</p>
             </div>
           </div>

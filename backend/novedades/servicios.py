@@ -1,4 +1,5 @@
 """Reglas de las novedades, anticipos y préstamos, en un solo lugar."""
+from datetime import datetime, time
 from decimal import ROUND_HALF_UP, Decimal
 
 from django.core.exceptions import ValidationError
@@ -6,7 +7,8 @@ from django.db import transaction
 from django.utils import timezone
 
 from nomina.models import ConceptoNomina
-from novedades.models import Anticipo, CuotaRecuperacion, Novedad, Prestamo, _sumar_meses, saldo_de
+from novedades.models import (Anticipo, CuotaRecuperacion, Novedad, Prestamo, ReciboAnticipo, _sumar_meses, recibo_vigente,
+                              saldo_de)
 
 
 def _separacion(objeto, usuario):
@@ -82,14 +84,15 @@ def rechazar_anticipo(anticipo, usuario, motivo):
 
 
 @transaction.atomic
-def pagar_anticipo(anticipo, usuario, forma_pago, referencia=''):
-    """Registra el pago y genera sus cuotas de recuperación (iguales; la última absorbe el redondeo)."""
+def pagar_anticipo(anticipo, usuario, forma_pago, referencia='', fecha=None):
+    """Registra el pago (hoy, o la fecha indicada, ej. al cargar la historia de la demo), genera sus cuotas de
+    recuperación (iguales; la última absorbe el redondeo) y emite el comprobante numerado."""
     anticipo = Anticipo.objects.select_for_update().get(pk=anticipo.pk)
     if anticipo.estado != Anticipo.APROBADO:
         raise ValidationError('Solo se paga un anticipo aprobado.')
     if forma_pago not in dict(Anticipo.FORMA_PAGO_OPCIONES):
         raise ValidationError({'forma_pago': 'Elegí la forma de pago.'})
-    ahora = timezone.now()
+    ahora = timezone.now() if fecha is None else timezone.make_aware(datetime.combine(fecha, time(10, 0)))
     concepto = _concepto(anticipo, 'ANTICIPO')
     primer_mes = anticipo.primer_mes.replace(day=1) if anticipo.primer_mes else _sumar_meses(timezone.localdate(), 1)
     n = anticipo.cuotas
@@ -105,7 +108,36 @@ def pagar_anticipo(anticipo, usuario, forma_pago, referencia=''):
     anticipo.pagado_por = usuario
     anticipo.pagado_en = ahora
     anticipo.save(update_fields=['estado', 'forma_pago', 'referencia_pago', 'pagado_por', 'pagado_en', 'modificado'])
+    emitir_recibo_anticipo(anticipo, usuario)
     return anticipo
+
+
+def emitir_recibo_anticipo(anticipo, usuario, fecha=None):
+    """Comprobante numerado del pago (A<año>-000001). Uno vigente por anticipo: si ya hay, lo devuelve."""
+    from nomina.liquidar import siguiente_numero
+    if anticipo.estado not in (Anticipo.PAGADO, Anticipo.RECUPERADO):
+        raise ValidationError('El comprobante se emite cuando el anticipo está pagado.')
+    vigente = recibo_vigente(anticipo)
+    if vigente is not None:
+        return vigente
+    fecha = fecha or (timezone.localtime(anticipo.pagado_en).date() if anticipo.pagado_en else timezone.localdate())
+    return ReciboAnticipo.objects.create(
+        empresa_id=anticipo.empresa_id, anticipo=anticipo, empleado_id=anticipo.empleado_id,
+        numero=siguiente_numero(anticipo.empresa, 'recibo_anticipo', fecha.year, prefijo='A'), fecha_emision=fecha,
+        monto=anticipo.monto_aprobado, moneda=anticipo.moneda, forma_pago=anticipo.get_forma_pago_display(),
+        referencia_pago=anticipo.referencia_pago, aporta_ips=anticipo.empleado.aporta_ips,
+        creado_por=usuario, modificado_por=usuario)
+
+
+def anular_recibo_anticipo(recibo, usuario, motivo):
+    """Anula el comprobante (no el pago): después se puede emitir otro, con número nuevo."""
+    if recibo.estado != ReciboAnticipo.EMITIDO:
+        raise ValidationError('Ya está anulado.')
+    recibo.estado = ReciboAnticipo.ANULADO
+    recibo.motivo_anulacion = motivo[:250]
+    recibo.modificado_por = usuario
+    recibo.save(update_fields=['estado', 'motivo_anulacion', 'modificado_por', 'modificado'])
+    return recibo
 
 
 def anular_anticipo(anticipo, usuario, motivo):

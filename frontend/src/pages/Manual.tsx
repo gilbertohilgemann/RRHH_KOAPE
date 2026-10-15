@@ -233,8 +233,12 @@ export default function Manual() {
               los datos corregidos; se paga solo la diferencia y la original queda como estaba.</li>
             <li><strong>Costo del empleador</strong>: por centro de costo, departamento, sucursal o empleado. La provisión de aguinaldo se
               muestra aparte y no suma al costo.</li>
+            <li><strong>Empleados sin control de asistencia</strong>: en el legajo, marcá <em>Sin control de asistencia</em>. No se le calcula
+              la asistencia y la nómina le paga siempre el valor completo del período (los días u horas de su horario si cobra por jornal u
+              hora). Cualquier descuento o bonificación se carga a mano como novedad. La ficha muestra también su <em>tipo de sueldo</em>.</li>
             <li><strong>Empleados sin IPS</strong>: en el legajo, desmarcá <em>Aporta al IPS</em>. Se liquida igual, pero sin el aporte del
-              trabajador ni el del empleador (su liquidación lo avisa) y no figura en la planilla del IPS.</li>
+              trabajador ni el del empleador (su liquidación lo avisa), su recibo no lleva el número patronal IPS y no figura en
+              la planilla del IPS.</li>
           </ul>
           <Aviso>Si las reglas legales o las fórmulas que usa la liquidación no están aprobadas, la liquidación es una <em>simulación</em>:
             sirve para revisar los números, pero no se puede aprobar.</Aviso>
@@ -293,7 +297,9 @@ export default function Manual() {
               bonos (BONO) y otros movimientos del período. Quedan <em>pendientes</em> hasta aprobarlas; aprobadas, las toma la liquidación.
               Una novedad ya aplicada en una nómina no se anula: se corrige con una rectificación.</li>
             <li><strong>Anticipos</strong>: se aprueban (por lo solicitado), se registra el pago con la referencia de la transferencia y se generan
-              solas las cuotas de recuperación. Los empleados también pueden pedirlos.</li>
+              solas las cuotas de recuperación y el <em>comprobante de anticipo</em> numerado (A2026-000001…), que se imprime y se firma al
+              entregarlo (<em>Ver e imprimir el comprobante</em>). En la nómina, cada cuota cita el número y la fecha del comprobante. Los
+              empleados también pueden pedirlos.</li>
             <li><strong>Préstamos</strong>: con la autorización firmada del empleado (documento del legajo) se aprueban; <em>Ver plan de cuotas</em>
               muestra cada cuota; al desembolsar se generan. Con interés mensual, la cuota es fija (sistema francés).</li>
             <li>Si el empleado paga aparte lo que falta, <em>El saldo se pagó aparte</em> cierra las cuotas pendientes sin borrarlas.</li>

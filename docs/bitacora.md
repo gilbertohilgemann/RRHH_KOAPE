@@ -2,6 +2,34 @@
 
 Qué se cambió, cuándo y por qué. Lo más reciente arriba.
 
+## 15/10/2026 — Empleados sin control de asistencia y tipo de sueldo en la ficha
+
+- Pedido del cliente: `Empleado.sin_control_asistencia` (se marca para quien no se controla). A ese empleado el motor
+  de asistencia no le calcula días (ni ausencias, tardanzas o marcas faltantes) y la nómina le paga siempre el **valor
+  completo** del período: mensual, quincenal o semanal entero; jornal o por hora, los días y las horas que programa su
+  horario (feriados incluidos; sin horario, lunes a sábado con la jornada diurna de las reglas legales). Sin descuento
+  por ausencias ni horas extra automáticas: descuentos o bonificaciones, solo cargados a mano como novedades. La
+  liquidación lo avisa.
+- La ficha del empleado muestra el **tipo de sueldo** del sueldo vigente (hora, día, semana, quincena, mes…); se sigue
+  cambiando desde Contratos / Historial salarial. Prueba nueva: 289, todas OK.
+
+## 15/10/2026 — Recibo de un empleado sin IPS
+
+- Pedido del cliente: el recibo de quien no aporta al IPS no lleva el número patronal IPS de la empresa (ni los
+  aportes, que ya no se calculaban). `LiquidacionEmpleado.aporta_ips` guarda si aportaba al calcular, así un recibo
+  histórico no cambia si después cambia el legajo; la migración marca las liquidaciones ya calculadas con el aviso
+  "No aporta al IPS". El recibo (API y pantalla) muestra el número patronal solo si aportaba. Prueba nueva: 286, todas OK.
+- **Comprobante de anticipo** (pedido del cliente): `ReciboAnticipo`, numerado aparte (A<año>-000001, misma
+  `SecuenciaDocumento` con bloqueo), se emite solo al registrar el pago del anticipo; pantalla para imprimir y firmar
+  con el formato del recibo de sueldo (monto, forma de pago, referencia y plan de cuotas; sin número patronal para quien
+  no aporta al IPS). Anular el comprobante no deshace el pago y permite emitir otro con número nuevo. En la nómina, cada
+  cuota cita el comprobante: "Cuota 1 de 2 del anticipo — comprobante A2026-000003 del 09/03/2026". La migración emitió
+  el comprobante de los anticipos ya pagados; los de la demo se regeneraron con la fecha de cada pago (las nóminas de la
+  demo ya cerradas conservan su texto anterior: no se tocan). `pagar_anticipo` acepta una fecha (para la historia
+  simulada). Pruebas: 288, todas OK.
+- Se reparó la codificación de `nomina/liquidar.py`, que un reemplazo hecho con PowerShell había dañado (acentos mal
+  codificados); git confirma que solo quedó el cambio buscado.
+
 ## 14/10/2026 — Empleados que no aportan al IPS
 
 - Pedido del cliente: hay funcionarios sin IPS. `Empleado.aporta_ips` (por defecto sí). Si está desmarcado, la nómina

@@ -212,8 +212,10 @@ def anular(corrida, usuario, motivo):
 
 
 # -------------------------------------------------------------------- recibos
-def _siguiente_numero(empresa, tipo, anio):
-    secuencia, _ = SecuenciaDocumento.objects.select_for_update().get_or_create(empresa=empresa, tipo=tipo, anio=anio)
+def siguiente_numero(empresa, tipo, anio, prefijo='R'):
+    """Número correlativo del documento (con bloqueo: dos emisiones a la vez no repiten número)."""
+    secuencia, _ = SecuenciaDocumento.objects.select_for_update().get_or_create(
+        empresa=empresa, tipo=tipo, anio=anio, defaults={'prefijo': prefijo})
     numero = secuencia.siguiente
     secuencia.siguiente += 1
     secuencia.save(update_fields=['siguiente'])
@@ -234,7 +236,7 @@ def emitir_recibos(corrida, usuario):
             continue
         emitidos.append(ReciboSueldo.objects.create(
             empresa_id=corrida.empresa_id, corrida=corrida, liquidacion=liq, empleado_id=liq.empleado_id,
-            numero=_siguiente_numero(corrida.empresa, 'recibo', corrida.periodo.fecha_hasta.year), tipo=tipo,
+            numero=siguiente_numero(corrida.empresa, 'recibo', corrida.periodo.fecha_hasta.year), tipo=tipo,
             fecha_emision=timezone.localdate(), periodo_desde=corrida.periodo.fecha_desde, periodo_hasta=corrida.periodo.fecha_hasta,
             bruto=liq.bruto, descuentos=liq.descuentos + liq.aportes_trabajador, neto=liq.neto, costo_empleador=liq.costo_empleador,
             creado_por=usuario, modificado_por=usuario))

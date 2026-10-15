@@ -19,7 +19,7 @@ from contratos.api import ContratoViewSet, EsquemaSalarialViewSet, HistorialSala
 from licencias.api import CertificadoViewSet, EscalaViewSet, MovimientoViewSet, SolicitudViewSet, TipoLicenciaViewSet
 from legal.api import ConjuntoViewSet
 from nomina.api import ConceptoViewSet, RecurrenteViewSet, ReglaViewSet, variables_nomina
-from novedades.api import AnticipoViewSet, CuotaViewSet, DescuentoViewSet, NovedadViewSet, PrestamoViewSet
+from novedades.api import AnticipoViewSet, CuotaViewSet, DescuentoViewSet, NovedadViewSet, PrestamoViewSet, ReciboAnticipoViewSet
 from nomina.api_liquidacion import (CorridaViewSet, LiquidacionFinalViewSet, LiquidacionViewSet, PagoViewSet, PeriodoViewSet,
                                     ReciboViewSet, costo_patronal)
 from empleados.api import (CentroCostoViewSet, CuentaBancariaViewSet, DepartamentoViewSet, DocumentoEmpleadoViewSet,
@@ -78,6 +78,7 @@ router.register(r'descuentos-autorizados', DescuentoViewSet, basename='descuento
 router.register(r'anticipos', AnticipoViewSet, basename='anticipo')
 router.register(r'prestamos', PrestamoViewSet, basename='prestamo')
 router.register(r'cuotas-recuperacion', CuotaViewSet, basename='cuota-recuperacion')
+router.register(r'recibos-anticipo', ReciboAnticipoViewSet, basename='recibo-anticipo')
 router.register(r'periodos-nomina', PeriodoViewSet, basename='periodo-nomina')
 router.register(r'corridas-nomina', CorridaViewSet, basename='corrida-nomina')
 router.register(r'liquidaciones-nomina', LiquidacionViewSet, basename='liquidacion-nomina')

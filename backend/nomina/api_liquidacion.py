@@ -336,7 +336,10 @@ class ReciboViewSet(RegistroViewSet):
         datos = self.get_serializer(recibo).data
         empresa, empleado, liq = recibo.empresa, recibo.empleado, recibo.liquidacion
         datos['empresa'] = {'nombre': empresa.nombre, 'razon_social': empresa.razon_social, 'ruc': empresa.ruc,
-                            'numero_patronal_ips': empresa.numero_patronal_ips, 'direccion': empresa.direccion}
+                            'direccion': empresa.direccion}
+        # Quien no aportaba al IPS (al calcular esa liquidación) no lleva el número patronal en su recibo.
+        if liq.aporta_ips:
+            datos['empresa']['numero_patronal_ips'] = empresa.numero_patronal_ips
         datos['empleado_datos'] = {'codigo': empleado.codigo, 'nombre': str(empleado), 'documento': empleado.numero_documento,
                                    'puesto': str(empleado.puesto) if empleado.puesto_id else '',
                                    'fecha_ingreso': empleado.fecha_ingreso}

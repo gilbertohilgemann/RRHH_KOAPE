@@ -140,6 +140,37 @@ class ApiTests(NovedadesMixin, TestCase):
                                                                'monto_solicitado': '500000', 'motivo': 'x'})
         self.assertEqual(self.cliente(self.admin1).post(f'/api/anticipos/{r.data["id"]}/aprobar/').status_code, 400)
 
+    def test_comprobante_de_anticipo(self):
+        from novedades.models import ReciboAnticipo
+        type(self.ana).objects.filter(pk=self.ana.pk).update(aporta_ips=False)
+        a = Anticipo.objects.create(empresa=self.e1, empleado=self.ana, fecha=date(2026, 3, 9), monto_solicitado=600000, cuotas=2,
+                                    primer_mes=date(2026, 4, 1), motivo='Urgencia')
+        servicios.aprobar_anticipo(a, self.admin1)
+        servicios.pagar_anticipo(a, self.admin1, 'transferencia', 'TRF-9', fecha=date(2026, 3, 10))
+        recibo = ReciboAnticipo.objects.get(anticipo=a)
+        self.assertEqual((recibo.numero, recibo.fecha_emision, recibo.monto), ('A2026-000001', date(2026, 3, 10), Decimal('600000')))
+        b = Anticipo.objects.create(empresa=self.e1, empleado=self.beto, fecha=date(2026, 3, 11), monto_solicitado=100000, motivo='x')
+        servicios.aprobar_anticipo(b, self.admin1)
+        servicios.pagar_anticipo(b, self.admin1, 'efectivo', fecha=date(2026, 3, 11))
+        self.assertEqual(ReciboAnticipo.objects.get(anticipo=b).numero, 'A2026-000002')  # correlativo
+        # La empleada ve el suyo (sin número patronal: no aporta al IPS) y no el de otro.
+        cliente = self.cliente(self.usr_ana)
+        datos = cliente.get(f'/api/recibos-anticipo/{recibo.pk}/').data
+        self.assertNotIn('numero_patronal_ips', datos['empresa'])
+        self.assertEqual([c['numero'] for c in datos['cuotas']], [1, 2])
+        self.assertEqual(cliente.get(f'/api/recibos-anticipo/{ReciboAnticipo.objects.get(anticipo=b).pk}/').status_code, 404)
+        self.assertEqual(cliente.post(f'/api/anticipos/{a.pk}/comprobante/').data['numero'], 'A2026-000001')
+        self.assertEqual(self.cliente(self.admin2).get(f'/api/recibos-anticipo/{recibo.pk}/').status_code, 404)
+        self.assertIn('numero_patronal_ips', self.cliente(self.admin1).get(
+            f'/api/recibos-anticipo/{ReciboAnticipo.objects.get(anticipo=b).pk}/').data['empresa'])
+        # Anular el comprobante no deshace el pago; se puede emitir otro, con número nuevo.
+        self.assertEqual(cliente.post(f'/api/recibos-anticipo/{recibo.pk}/anular/', {'motivo': 'x'}).status_code, 403)
+        self.cliente(self.admin1).post(f'/api/recibos-anticipo/{recibo.pk}/anular/', {'motivo': 'Error de impresión'})
+        nuevo = self.cliente(self.admin1).post(f'/api/anticipos/{a.pk}/comprobante/').data
+        self.assertEqual(nuevo['numero'], 'A2026-000003')
+        a.refresh_from_db()
+        self.assertEqual(a.estado, Anticipo.PAGADO)
+
     def test_prestamo_por_api_con_plan(self):
         cliente = self.cliente(self.admin1)
         r = cliente.post('/api/prestamos/', {'empleado': self.ana.pk, 'fecha': '2026-10-01', 'capital': '600000',

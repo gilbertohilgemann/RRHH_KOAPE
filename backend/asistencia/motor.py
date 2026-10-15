@@ -331,8 +331,11 @@ def _calcular(ctx, fecha):
 def calcular(empleado, desde, hasta=None):
     """Calcula (o recalcula) los días del empleado entre `desde` y `hasta`
     (inclusive). Saltea los días fuera de su período laboral y los de nóminas
-    cerradas. Devuelve la lista de DiaAsistencia."""
+    cerradas. A un empleado sin control de asistencia no se le calcula nada
+    (la nómina le paga el valor completo). Devuelve la lista de DiaAsistencia."""
     from asistencia.importacion import periodo_cerrado
+    if empleado.sin_control_asistencia:
+        return []
     hasta = hasta or desde
     desde = max(desde, empleado.fecha_ingreso)
     if empleado.fecha_egreso:

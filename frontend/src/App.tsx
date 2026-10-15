@@ -28,6 +28,7 @@ import CostoPatronal from './pages/CostoPatronal'
 import MisRecibos from './pages/MisRecibos'
 import PlanillaOficial from './pages/PlanillaOficial'
 import Reportes from './pages/Reportes'
+import ReciboAnticipo from './pages/ReciboAnticipo'
 
 export default function App() {
   return (
@@ -61,6 +62,7 @@ export default function App() {
             <Route path="/mis-recibos" element={<MisRecibos />} />
             <Route path="/nomina/planillas/:id" element={<PlanillaOficial />} />
             <Route path="/reportes" element={<Reportes />} />
+            <Route path="/anticipos/comprobante/:id" element={<ReciboAnticipo />} />
             {/* Manual de usuario: solo con sesión iniciada. */}
             <Route path="/manual" element={<Manual />} />
             <Route path="/m/:clave" element={<Listado />} />

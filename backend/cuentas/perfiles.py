@@ -239,7 +239,15 @@ FASE_11 = {
     ),
 }
 
-FASES = [FASE_1, FASE_2, FASE_3, FASE_4, FASE_5, FASE_6, FASE_7, FASE_8, FASE_9, FASE_10, FASE_11]
+# ------------------------------------------------------- Comprobante de anticipo (15/10/2026)
+COMPROBANTES_ANTICIPO = {
+    # Lo emite quien registra el pago (novedades.pagar_anticipo); los tres perfiles lo ven (el empleado, los suyos).
+    alcance.GRUPO_ADMINISTRADOR: ['novedades.view_reciboanticipo'],
+    alcance.GRUPO_GESTOR: ['novedades.view_reciboanticipo'],
+    alcance.GRUPO_EMPLEADO: ['novedades.view_reciboanticipo'],
+}
+
+FASES = [FASE_1, FASE_2, FASE_3, FASE_4, FASE_5, FASE_6, FASE_7, FASE_8, FASE_9, FASE_10, FASE_11, COMPROBANTES_ANTICIPO]
 
 
 def _unir(*fases):

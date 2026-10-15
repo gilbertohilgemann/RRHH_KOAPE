@@ -176,7 +176,7 @@ class _Liquidador:
         if activo_hasta < activo_desde:
             activo_hasta = activo_desde
         liq = LiquidacionEmpleado(empresa=ctx.empresa, corrida=ctx.corrida, empleado=empleado, contrato=contrato,
-                                  centro_costo=empleado.centro_costo, creado_por=None)
+                                  centro_costo=empleado.centro_costo, aporta_ips=empleado.aporta_ips, creado_por=None)
         sueldo = sueldo_vigente(empleado, activo_hasta) if contrato else None
         if contrato is None:
             self.errores.append('No tiene un contrato vigente en el período.')
@@ -197,15 +197,22 @@ class _Liquidador:
 
         # --- asistencia del período
         from asistencia.models import DiaAsistencia, IncidenciaAsistencia
-        dias = list(DiaAsistencia.objects.filter(empleado=empleado, fecha__gte=activo_desde, fecha__lte=activo_hasta)
-                    .select_related('licencia__tipo'))
-        justificadas = set(IncidenciaAsistencia.objects.filter(
-            empleado=empleado, fecha__gte=activo_desde, fecha__lte=activo_hasta, tipo=IncidenciaAsistencia.AUSENCIA,
-            estado='justificada').values_list('fecha', flat=True))
+        sin_control = empleado.sin_control_asistencia
         dias_activos = (activo_hasta - activo_desde).days + 1
-        if len(dias) < dias_activos:
-            self.advertencias.append(f'Hay {dias_activos - len(dias)} día(s) del período sin asistencia calculada: '
-                                     'calculá la asistencia antes de liquidar.')
+        if sin_control:
+            # Sin control de asistencia: se paga el valor completo del período; descuentos y bonos, solo por novedades.
+            dias, justificadas = [], set()
+            self.advertencias.append('Sin control de asistencia (legajo): se paga el valor completo; descuentos o bonificaciones, '
+                                     'solo cargados a mano.')
+        else:
+            dias = list(DiaAsistencia.objects.filter(empleado=empleado, fecha__gte=activo_desde, fecha__lte=activo_hasta)
+                        .select_related('licencia__tipo'))
+            justificadas = set(IncidenciaAsistencia.objects.filter(
+                empleado=empleado, fecha__gte=activo_desde, fecha__lte=activo_hasta, tipo=IncidenciaAsistencia.AUSENCIA,
+                estado='justificada').values_list('fecha', flat=True))
+            if len(dias) < dias_activos:
+                self.advertencias.append(f'Hay {dias_activos - len(dias)} día(s) del período sin asistencia calculada: '
+                                         'calculá la asistencia antes de liquidar.')
         trabajados = sum(1 for d in dias if d.estado in (DiaAsistencia.PRESENTE, DiaAsistencia.INCOMPLETO))
         ausencias = sum(1 for d in dias if d.estado == DiaAsistencia.AUSENTE and d.fecha not in justificadas)
         licencia_paga = [d for d in dias if d.estado == DiaAsistencia.LICENCIA and d.minutos_programados and d.licencia_id
@@ -226,6 +233,10 @@ class _Liquidador:
         liq.dias_trabajados = trabajados
         liq.minutos_ordinarios = sum(d.minutos_ordinarios for d in dias)
         liq.minutos_extra = sum(d.minutos_extra_autorizados for d in dias)
+        if sin_control:
+            # Valor justo: los días y las horas de su horario en el período (con los feriados, que se pagan igual).
+            trabajados, minutos = self._programado(activo_desde, activo_hasta, horas_dia)
+            liq.dias_trabajados, liq.minutos_ordinarios = trabajados, minutos
 
         # --- valor del día y días pagados según la base del esquema
         salario = Decimal(sueldo.salario_base)
@@ -312,11 +323,38 @@ class _Liquidador:
                 linea.base = self.variables['BASE_IPS']  # en el recibo se ve sobre qué base se aportó
         self._fijos_y_novedades(fijos, novedades, ConceptoNomina.DESCUENTO)
         self._descuentos_autorizados()
+        from novedades.models import recibo_vigente
         for cuota in cuotas:
-            origen = f'anticipo del {cuota.anticipo.fecha:%d/%m/%Y}' if cuota.anticipo_id else f'préstamo del {cuota.prestamo.fecha:%d/%m/%Y}'
-            self.agregar(cuota.concepto, cuota.monto, f'Cuota {cuota.numero} del {origen} (mes {cuota.mes:%m/%Y})', 'cuota', cuota.pk)
+            if cuota.anticipo_id:
+                total = cuota.anticipo.cuotas
+                comprobante = recibo_vigente(cuota.anticipo)
+                origen = (f'anticipo — comprobante {comprobante.numero} del {comprobante.fecha_emision:%d/%m/%Y}' if comprobante
+                          else f'anticipo del {cuota.anticipo.fecha:%d/%m/%Y}')
+            else:
+                total = cuota.prestamo.cantidad_cuotas
+                origen = f'préstamo del {cuota.prestamo.fecha:%d/%m/%Y}'
+            self.agregar(cuota.concepto, cuota.monto, f'Cuota {cuota.numero} de {total} del {origen} (mes {cuota.mes:%m/%Y})',
+                         'cuota', cuota.pk)
 
         return self._totales(liq)
+
+    def _programado(self, desde, hasta, horas_dia):
+        """(días, minutos) que el horario del empleado programa entre esas fechas, feriados incluidos.
+        Sin horario asignado: lunes a sábado, con la jornada diurna de las reglas legales."""
+        from datetime import timedelta
+        from jornada.models import AsignacionHorario
+        asignaciones = list(AsignacionHorario.objects.filter(empleado=self.empleado, vigente_desde__lte=hasta).filter(
+            Q(vigente_hasta__isnull=True) | Q(vigente_hasta__gte=desde)).select_related('horario').prefetch_related('horario__tramos'))
+        dias = minutos = 0
+        fecha = desde
+        while fecha <= hasta:
+            horario = next((a.horario for a in asignaciones if a.vigente_desde <= fecha and (a.vigente_hasta is None or fecha <= a.vigente_hasta)), None)
+            del_dia = horario.minutos_dia(fecha.weekday()) if horario else (int(horas_dia * 60) if fecha.weekday() < 6 else 0)
+            if del_dia:
+                dias += 1
+                minutos += del_dia
+            fecha += timedelta(days=1)
+        return dias, minutos
 
     def _totales(self, liq):
         ctx, empleado = self.ctx, self.empleado
@@ -405,7 +443,8 @@ class _Liquidador:
 
     def liquidar_aguinaldo(self):
         ctx = self.ctx
-        liq = LiquidacionEmpleado(empresa=ctx.empresa, corrida=ctx.corrida, empleado=self.empleado, centro_costo=self.empleado.centro_costo)
+        liq = LiquidacionEmpleado(empresa=ctx.empresa, corrida=ctx.corrida, empleado=self.empleado, centro_costo=self.empleado.centro_costo,
+                                  aporta_ips=self.empleado.aporta_ips)
         computable, pagado = self._remuneraciones_del_anio(ctx.desde, ctx.hasta)
         meses = CorridaNomina.objects.filter(
             liquidaciones__empleado=self.empleado, estado=CorridaNomina.CERRADA, rectificada=False,

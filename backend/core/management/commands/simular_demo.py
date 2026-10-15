@@ -482,7 +482,7 @@ class Command(BaseCommand):
                                                cuotas=cuotas, primer_mes=(fecha + timedelta(days=32)).replace(day=1),
                                                creado_por=self.gestor, modificado_por=self.gestor)
             servicios.aprobar_anticipo(anticipo, self.admin)
-            servicios.pagar_anticipo(anticipo, self.admin, 'transferencia', f'TRF-ANT-{anticipo.pk}')
+            servicios.pagar_anticipo(anticipo, self.admin, 'transferencia', f'TRF-ANT-{anticipo.pk}', fecha=fecha + timedelta(days=1))
         # Préstamos con autorización firmada.
         for codigo, fecha, capital, cuotas, interes in (('E004', date(2024, 4, 3), 3000000, 6, 0), ('E001', date(2025, 1, 15), 8000000, 12, 1),
                                                         ('E010', date(2025, 10, 6), 4500000, 9, 0)):

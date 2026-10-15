@@ -121,6 +121,31 @@ class MotorTests(NominaMixin, TestCase):
             empresa=self.e1, tipo=PresentacionOficial.MTESS_SUELDOS, periodo_desde=date(2026, 1, 1), periodo_hasta=date(2026, 12, 31)))
         self.assertTrue(mtess.lineas.filter(empleado=self.ana).exists())  # en la del MTESS sí
 
+    def test_sin_control_de_asistencia_cobra_el_valor_completo(self):
+        Marcacion.objects.filter(empleado=self.ana).delete()  # no marcó nunca
+        type(self.ana).objects.filter(pk=self.ana.pk).update(sin_control_asistencia=True)
+        self.ana.refresh_from_db()
+        self.assertEqual(motor_asistencia.calcular(self.ana, *OCTUBRE), [])  # la asistencia no se le calcula
+        # Beto, jornalero sin horario asignado ni marcas: sin control cobra los días programados (lunes a sábado).
+        type(self.beto).objects.filter(pk=self.beto.pk).update(sin_control_asistencia=True)
+        liq = self.liquidacion(liquidar.crear(self.periodo, self.gestor1))
+        self.assertEqual(linea(liq, 'SUELDO').importe, Decimal('3000000'))
+        self.assertIsNone(linea(liq, 'DESCUENTO_AUSENCIA'))
+        self.assertIn('Sin control de asistencia', ' '.join(liq.advertencias))
+        beto = self.liquidacion(liq.corrida, self.beto)
+        self.assertEqual((beto.dias_pagados, linea(beto, 'SUELDO').importe), (Decimal('27'), Decimal('3240000')))  # 27 × 120.000
+
+    def test_la_cuota_del_anticipo_cita_su_comprobante(self):
+        from novedades import servicios as novedades
+        anticipo = Anticipo.objects.create(empresa=self.e1, empleado=self.ana, fecha=date(2026, 9, 8), monto_solicitado=500000, cuotas=2,
+                                           primer_mes=date(2026, 10, 1), motivo='x')
+        novedades.aprobar_anticipo(anticipo, self.admin1)
+        novedades.pagar_anticipo(anticipo, self.admin1, 'transferencia', fecha=date(2026, 9, 9))
+        liq = self.liquidacion(liquidar.crear(self.periodo, self.gestor1))
+        cuota = linea(liq, 'ANTICIPO')
+        self.assertEqual(cuota.importe_con_signo, Decimal('-250000'))
+        self.assertIn('Cuota 1 de 2 del anticipo — comprobante A2026-000001 del 09/09/2026', cuota.explicacion)
+
     def test_recalcular_no_duplica(self):
         corrida = liquidar.crear(self.periodo, self.gestor1)
         liquidar.recalcular(corrida, self.gestor1)
@@ -260,6 +285,22 @@ class ApiTests(NominaMixin, TestCase):
         self.assertIn('total_costo_empleador', admin.get(f'/api/corridas-nomina/{pk}/').data)
         costo = admin.get('/api/costo-patronal/?agrupar=empleado').data
         self.assertEqual(Decimal(costo['totales']['total']), Decimal('3495000'))
+
+    def test_recibo_sin_ips_no_lleva_numero_patronal_ni_aportes(self):
+        type(self.ana).objects.filter(pk=self.ana.pk).update(aporta_ips=False)
+        corrida = self.cerrada()
+        liquidar.emitir_recibos(corrida, self.admin1)
+        liquidar.publicar_recibos(corrida, self.admin1)
+        recibo_ana = ReciboSueldo.objects.get(empleado=self.ana)
+        recibo_beto = ReciboSueldo.objects.get(empleado=self.beto)
+        datos = self.cliente(self.usr_ana).get(f'/api/recibos/{recibo_ana.pk}/').data
+        self.assertNotIn('numero_patronal_ips', datos['empresa'])
+        self.assertFalse([l for l in datos['lineas'] if l['tipo'] in ('aporte_trabajador', 'aporte_patronal')])
+        self.assertEqual(Decimal(datos['neto']), Decimal('3000000'))
+        self.assertIn('numero_patronal_ips', self.cliente(self.admin1).get(f'/api/recibos/{recibo_beto.pk}/').data['empresa'])
+        # Si después pasa a aportar, su recibo viejo no cambia.
+        type(self.ana).objects.filter(pk=self.ana.pk).update(aporta_ips=True)
+        self.assertNotIn('numero_patronal_ips', self.cliente(self.usr_ana).get(f'/api/recibos/{recibo_ana.pk}/').data['empresa'])
 
     def test_el_empleado_ve_solo_sus_recibos_publicados(self):
         corrida = self.cerrada()

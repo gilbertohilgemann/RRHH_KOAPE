@@ -393,6 +393,8 @@ class LiquidacionEmpleado(RegistroEmpresa):
     provision_aguinaldo = models.DecimalField('provisión de aguinaldo (estimada, no suma al costo)', max_digits=18,
                                               decimal_places=2, default=0)
     neto_anterior = models.DecimalField('neto de la liquidación rectificada', max_digits=18, decimal_places=2, null=True, blank=True)
+    aporta_ips = models.BooleanField('aportaba al IPS', default=True,
+                                     help_text='Copia del legajo al calcular: el recibo histórico no cambia si después cambia el legajo.')
     estado_calculo = models.CharField('cálculo', max_length=12, choices=CALCULO_OPCIONES, default=OK)
     advertencias = models.JSONField('advertencias', default=list)
     estado_pago = models.CharField('pago', max_length=12, choices=PAGO_OPCIONES, default='pendiente')
