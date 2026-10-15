@@ -281,6 +281,27 @@ export default function Manual() {
         </Seccion>
       )}
 
+      {general && (
+        <Seccion numero={++n} titulo="Tablero">
+          <p>En <strong>Reportes → Tablero</strong> elegí el rango de meses y, si querés, una sucursal, un departamento, un centro de costo
+            o algunos empleados: todos los gráficos se recalculan con esos filtros. Pasá el mouse sobre un gráfico para ver los valores de cada
+            mes; el botón de la esquina muestra los mismos datos como tabla, y <strong>Excel</strong> los descarga.</p>
+          <ul className="list-disc pl-5">
+            <li><strong>Nómina</strong>: el último mes con nómina cerrada (bruto, neto, IPS, descuentos, costo y empleados) con su variación
+              contra el mes anterior y el mismo mes del año anterior; cómo se reparte el bruto mes a mes (neto, IPS del trabajador, descuentos
+              y, si podés verlo, el IPS del empleador); el IPS y los descuentos en % del bruto; y cada concepto del período con su parte.</li>
+            <li><strong>Comparar</strong>: <em>Períodos</em> pone el rango elegido (A) contra otro (B: “Un año antes”, “Período anterior” o el
+              que elijas), con la diferencia y la variación de cada indicador y el desglose por departamento, sucursal o centro de costo.
+              <em> Departamentos</em>, <em>Sucursales</em>, <em>Centros de costo</em> y <em>Empleados</em> muestran el ranking del indicador
+              elegido, su evolución mes a mes y el detalle. Para comparar empleados puntuales, elegilos en el filtro Empleados.</li>
+            <li><strong>Personal y asistencia</strong>: dotación al cierre de cada mes, altas y bajas, ausentismo, horas extra, tardanzas y ausencias.</li>
+            <li><strong>Licencias y permisos</strong>: días de licencia y horas de permiso por mes, y el reparto por tipo de licencia.</li>
+          </ul>
+          <Aviso>Cuenta solo la nómina cerrada (si se rectificó, la rectificación); diciembre incluye el aguinaldo. Departamento, sucursal y
+            centro de costo son los actuales de cada legajo. El Gestor no ve el costo del empleador; el perfil Empleado no tiene tablero.</Aviso>
+        </Seccion>
+      )}
+
       {usuario?.empleado && tienePermiso(usuario, 'novedades.view_anticipo') && !general && (
         <Seccion numero={++n} titulo="Mis anticipos y descuentos">
           <p>En <strong>Mis anticipos y descuentos</strong> ves tus anticipos y préstamos (con lo que falta descontar), tus descuentos autorizados

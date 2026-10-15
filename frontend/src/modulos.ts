@@ -7,7 +7,7 @@ import {
   AlertTriangle, CalendarCheck, Clock4, PenLine, Timer, FileCog, FileUp, Fingerprint, Hash, KeyRound, MonitorSmartphone, ShieldAlert, SlidersHorizontal,
   Banknote, Briefcase, Building2, CalendarClock, CalendarDays, Calculator, ClipboardList, Clock, Gauge, Coins, FileSignature, FileText, FolderOpen, IdCard, Landmark,
   Network, Store, UserCog, Palmtree, CalendarHeart, Stethoscope, ListChecks, TrendingUp, Repeat, ListTree, SquareFunction, Scale, Gavel,
-  ClipboardPlus, HandCoins, BadgeMinus, CalendarRange, Receipt, PieChart, LogOut, BarChart3,
+  ClipboardPlus, HandCoins, BadgeMinus, CalendarRange, Receipt, PieChart, LogOut, BarChart3, LayoutDashboard,
 } from 'lucide-react'
 import type { Campo, Grupo, Modulo, Opcion } from './tipos'
 
@@ -869,6 +869,11 @@ export const MODULOS: Modulo[] = [
       { campo: 'tipo', etiqueta: 'Planilla' }, { campo: 'periodo_desde', etiqueta: 'Desde' }, { campo: 'periodo_hasta', etiqueta: 'Hasta' },
       { campo: 'cantidad_lineas', etiqueta: 'Empleados' }, { campo: 'lineas_con_errores', etiqueta: 'Con errores' }, { campo: 'estado', etiqueta: 'Estado' },
     ],
+  },
+  {
+    clave: 'tablero', titulo: 'Tablero', singular: 'tablero', grupo: 'Reportes', icono: LayoutDashboard,
+    descripcion: 'Gráficos de sueldos, IPS, descuentos, licencias y asistencia; comparación de períodos, departamentos y empleados.',
+    endpoint: 'tablero', modelo: 'empleados.empleado', rutaPropia: '/tablero', sinAlta: true, campos: [], columnas: [],
   },
   {
     clave: 'reportes', titulo: 'Reportes', singular: 'reporte', grupo: 'Reportes', icono: BarChart3,

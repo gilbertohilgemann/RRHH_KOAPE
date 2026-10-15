@@ -7,6 +7,7 @@ from rest_framework.routers import DefaultRouter
 from core.api.auditoria import EventoAuditoriaViewSet
 from core.api.views import AccesoEmpresaView, IngresarView, ResumenView, SalirView, YoView
 from core.api import reportes as api_reportes
+from core.api import tablero as api_tablero
 from cumplimiento.api import PresentacionViewSet
 from cuentas.api import UsuarioViewSet
 from asistencia.api import (ConfiguracionMarcacionView, CredencialViewSet, IncidenciaViewSet, IntentoViewSet,
@@ -96,6 +97,8 @@ urlpatterns = [
     path('api/acceso/<slug:direccion>/', AccesoEmpresaView.as_view(), name='acceso-empresa'),
     path('api/reportes/', api_reportes.lista, name='reportes'),
     path('api/reportes/<slug:clave>/', api_reportes.ver, name='reporte'),
+    path('api/tablero/', api_tablero.ver, name='tablero'),
+    path('api/tablero/opciones/', api_tablero.opciones, name='tablero-opciones'),
     path('api/variables-nomina/', variables_nomina, name='variables-nomina'),
     path('api/costo-patronal/', costo_patronal, name='costo-patronal'),
     # Marcador: el empleado escanea con su sesión el QR que proyecta la terminal (con su clave).

@@ -295,6 +295,10 @@ Casi todos heredan de `core.models.RegistroBase` (auditoría: `creado_por`,
   CORRESPONDE_PREAVISO, CORRESPONDE_INDEMNIZACION y SALDO_VACACIONES, calculadas con los parámetros de PY-EGRESO.
 - **Reportes y exportaciones**: un reporte nuevo se agrega con el decorador `@reporte(...)` en `core/reportes.py`
   (permiso, filtros, columnas; filtrar siempre con `alcance.filtrar`). Toda exportación pasa por `core/exportar.py`.
+- **Tablero**: `core/tablero.py` (`GET /api/tablero/?agrupar=mes|total|departamento|sucursal|centro_costo|empleado&por_mes=1`)
+  suma por bloques (nómina cerrada, licencias, asistencia, dotación); cada bloque exige su permiso y no viene si falta.
+  Un indicador nuevo se suma en el bloque y en `METRICAS` de `frontend/src/pages/Tablero.tsx`. Los gráficos
+  (`components/Graficos.tsx`) usan la paleta `SERIES` en orden fijo (validada para daltonismo): no agregar colores sueltos.
 - **Dirección de ingreso por empresa**: `Empresa.direccion_acceso` → `rrhh.koapesystem.com/<dirección>` (ruta
   `/:direccion` del frontend, la última antes del comodín: las rutas fijas tienen prioridad). `GET /api/acceso/<dirección>/`
   da nombre y marca sin sesión; `POST /api/sesion/ingresar/` con `empresa` solo acepta usuarios de esa empresa (o la

@@ -2,6 +2,21 @@
 
 Qué se cambió, cuándo y por qué. Lo más reciente arriba.
 
+## 15/10/2026 — Tablero con gráficos y comparaciones
+
+- Pedido del cliente: gráficos de sueldos, descuentos, IPS y permisos, en números y porcentajes, comparando períodos,
+  departamentos y empleados puntuales. Pantalla nueva **Reportes → Tablero** (`/tablero`), con filtros de rango de meses,
+  sucursal, departamento, centro de costo y empleados, y cuatro pestañas: Nómina (tarjetas del último mes cerrado con
+  variación contra el mes anterior y el mismo mes del año anterior; reparto del bruto; IPS y descuentos en % del bruto;
+  conceptos del período), Comparar (período A contra B, o ranking y evolución por departamento, sucursal, centro de costo
+  o empleado), Personal y asistencia, y Licencias y permisos. Exporta a Excel (queda en la auditoría).
+- Backend: `core/tablero.py` + `GET /api/tablero/` y `/api/tablero/opciones/` (`core/api/tablero.py`). Solo nómina cerrada
+  y no rectificada, en el mes de fin de su período; licencias aprobadas en el mes en que empiezan; departamento, sucursal y
+  centro de costo actuales del legajo. Cada bloque exige su permiso de consulta (el costo del empleador, `ver_costo_patronal`);
+  Administrador y Gestor, como los reportes; recortado por `core/alcance.py`. Rango máximo: 60 meses. Sin modelos nuevos.
+- Frontend: gráficos propios en SVG (`components/Graficos.tsx`, sin librerías nuevas) con paleta categórica validada para
+  daltonismo, tooltip y vista de tabla en cada gráfico. Manual actualizado. Pruebas nuevas (`nomina/tests_tablero.py`): 296, todas OK.
+
 ## 15/10/2026 — Empleados sin control de asistencia y tipo de sueldo en la ficha
 
 - Pedido del cliente: `Empleado.sin_control_asistencia` (se marca para quien no se controla). A ese empleado el motor
